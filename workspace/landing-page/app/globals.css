@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  /* Quiet luxury — monogram canvas: ivory + cognac + antique gold */
+  --background: #f5efe3;
+  --foreground: #2b1c12;
+  --primary: #6b4226;
+  --primary-light: #8a5a34;
+  --primary-dark: #4a2c17;
+  --accent: #96702e;
+  --accent-dark: #6f5220;
+  --ink: #2b1c12;
+  --ink-soft: #6b5a4a;
+  --surface: #fbf7ef;
+  --border-soft: #e3d5b8;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-surface: var(--surface);
+  --color-border-soft: var(--border-soft);
+  --font-heading: var(--font-cormorant);
+  --font-body: var(--font-montserrat);
+  --font-handwriting: var(--font-dancing-script);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), Arial, sans-serif;
+  font-size: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  /* Bảng màu THẢO MỘC NHÀ THUỶ — xanh lá thảo mộc, xanh rêu, kem/be tự nhiên, nâu gỗ. */
+  --background: #f8f4e8;
+  --foreground: #2f3a26;
+  --primary: #5a6b47;
+  --primary-light: #8a9678;
+  --primary-dark: #3d4a30;
+  --accent: #4f7942;
+  --accent-dark: #3a5a30;
+  --surface: #fffdf6;
+  --border-soft: #e3d9bf;
+  --wood: #8a5a35;
+  --wood-dark: #6b4526;
+  --success: #3a7d3f;
+  --danger: #b3462c;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-surface: var(--surface);
+  --color-border-soft: var(--border-soft);
+  --color-wood: var(--wood);
+  --color-wood-dark: var(--wood-dark);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --font-heading: var(--font-be-vietnam-pro);
+  --font-body: var(--font-nunito-sans);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), Arial, sans-serif;
+  font-size: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
