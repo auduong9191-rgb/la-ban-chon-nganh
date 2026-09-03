@@ -19,6 +19,12 @@ function getTransport() {
 // (components/FloatingContactBar.tsx), định dạng quốc tế 84 không có số 0 đầu.
 const ZALO_URL = "https://zalo.me/84948645419";
 
+// Trigger 4 — link Google Form khảo sát sau bán, cuối form đã có sẵn link tải
+// quà Checklist chọn ngành + hướng dẫn sử dụng (không cần đính kèm file/gate
+// riêng ở phía email). Đặt hardcode tại đây (giống ZALO_URL) để đổi form mới
+// sau này chỉ cần sửa 1 chỗ, không phải sửa route cron.
+const SURVEY_FORM_URL = "https://forms.gle/te3eMDwXC3P1WvZt5";
+
 export async function sendCareerMapEmail(params: {
   to: string;
   hoTen: string;
@@ -153,12 +159,13 @@ export async function sendFreeReportToCtv(params: {
   });
 }
 
-// Trigger 2 — gửi ngay khi đơn thanh toán thành công, chỉ cho CTV nhóm '2' (có
-// xuất Career Map), để họ chủ động xuất map + tư vấn mà không cần chủ shop
-// kiểm tra Telegram rồi báo lại thủ công.
+// Trigger 2 — gửi ngay khi đơn thanh toán thành công, cho CTV giới thiệu ở cả
+// 2 nhóm — nhóm 2 cần xuất Career Map nên có thêm block hướng dẫn riêng, nhóm
+// 1 chỉ giới thiệu nhưng vẫn cần biết khách đã trả tiền để tiếp tục upsell.
 export async function sendPaidLeadToCtv(params: {
   to: string;
   ctvName: string;
+  groupType: string;
   hoTen: string;
   dob: string;
   khoiHoc: string;
@@ -174,18 +181,32 @@ export async function sendPaidLeadToCtv(params: {
   const transport = getTransport();
   const fromUser = process.env.GMAIL_USER;
   const amountFormatted = params.amount.toLocaleString("vi-VN") + "đ";
+  const isGroup2 = params.groupType === "2";
 
-  const bodyText = `Chào ${params.ctvName},
-
-Khách bạn giới thiệu vừa thanh toán thành công — bạn xuất Career Map cho bạn này nhé:
-
---- Để xuất Career Map ---
+  const studentBlock = isGroup2
+    ? `--- Để xuất Career Map ---
 Họ tên học sinh: ${params.hoTen}
 Ngày sinh: ${params.dob}
 Khối học: ${params.khoiHoc}
 Học lực: ${params.hocLuc}
 
---- Để tư vấn khách ---
+`
+    : `--- Thông tin học sinh ---
+Họ tên học sinh: ${params.hoTen}
+Khối học: ${params.khoiHoc}
+Học lực: ${params.hocLuc}
+
+`;
+
+  const intro = isGroup2
+    ? "Khách bạn giới thiệu vừa thanh toán thành công — bạn xuất Career Map cho bạn này nhé:"
+    : "Khách bạn giới thiệu vừa thanh toán thành công — thông tin để bạn tiếp tục chăm sóc và upsell nhé:";
+
+  const bodyText = `Chào ${params.ctvName},
+
+${intro}
+
+${studentBlock}--- Để tư vấn khách ---
 Tên phụ huynh: ${params.tenPhuHuynh}
 SĐT: ${params.phone}
 Email: ${params.email}
@@ -199,11 +220,114 @@ ${params.freeReport}
 Trân trọng,
 Tiara Edu`;
 
+  const subject = isGroup2
+    ? `[Tiara Edu] Khách mới đã thanh toán — cần xuất Career Map cho ${params.hoTen}`
+    : `[Tiara Edu] Khách mới đã thanh toán — ${params.hoTen}`;
+
   await transport.sendMail({
     from: `"Tiara Edu" <${fromUser}>`,
     to: params.to,
-    subject: `[Tiara Edu] Khách mới đã thanh toán — cần xuất Career Map cho ${params.hoTen}`,
+    subject,
     text: bodyText,
     html: `<pre style="white-space:pre-wrap;font-family:inherit;">${escapeHtml(bodyText)}</pre>`,
+  });
+}
+
+// Trigger 3 — gửi ngay khi trọn bộ báo cáo (Career Map + Chiến lược + Xu
+// hướng Học tập nếu có) vừa được gửi cho khách, cho CTV giới thiệu ở cả 2
+// nhóm — CTV cần có sẵn đúng bộ file khách đang cầm trong tay để chăm sóc/
+// upsell tiếp (Coach 1-1, sản phẩm khác...), không phải chờ tự đi hỏi khách
+// hoặc chủ shop. Đính kèm y hệt bộ đã gửi khách (kể cả trường hợp Career Map
+// gốc quá nặng phải thay bằng link tải).
+export async function sendFullReportsToCtv(params: {
+  to: string;
+  ctvName: string;
+  hoTen: string;
+  tenPhuHuynh: string;
+  phone: string;
+  email: string;
+  attachments: { fileName: string; pdfBuffer: Buffer }[];
+  careerMapDownloadUrl?: string;
+}): Promise<void> {
+  const transport = getTransport();
+  const fromUser = process.env.GMAIL_USER;
+
+  const downloadLine = params.careerMapDownloadUrl
+    ? `\n\nCareer Map gốc hơi nặng nên gửi kèm link tải riêng (hiệu lực 24h): ${params.careerMapDownloadUrl}`
+    : "";
+
+  const bodyText = `Chào ${params.ctvName},
+
+Khách bạn giới thiệu (${params.hoTen}) vừa nhận được trọn bộ báo cáo — gửi bạn bản đính kèm y hệt để tiện chăm sóc và upsell tiếp:
+
+Phụ huynh: ${params.tenPhuHuynh}
+SĐT: ${params.phone}
+Email: ${params.email}${downloadLine}
+
+Trân trọng,
+Tiara Edu`;
+
+  await transport.sendMail({
+    from: `"Tiara Edu" <${fromUser}>`,
+    to: params.to,
+    subject: `[Tiara Edu] Trọn bộ báo cáo của ${params.hoTen} — gửi bạn để chăm sóc khách`,
+    text: bodyText,
+    html: `<pre style="white-space:pre-wrap;font-family:inherit;">${escapeHtml(bodyText)}</pre>`,
+    attachments: params.attachments.map((a) => ({
+      filename: a.fileName,
+      content: a.pdfBuffer,
+      contentType: "application/pdf",
+    })),
+  });
+}
+
+// Trigger 4 — gửi 72h sau khi khách nhận trọn bộ báo cáo (cron
+// app/api/cron/send-survey-email/route.ts quét cột leads.strategy_updated_at),
+// chỉ cho khách cá nhân + khách CTV nhóm 1 (route đã lọc trước khi gọi hàm
+// này, hàm không tự lọc lại). Quà Checklist chọn ngành nằm ở cuối Google Form
+// khảo sát (SURVEY_FORM_URL), không đính kèm file trong email này.
+export async function sendSurveyInviteEmail(params: {
+  to: string;
+  hoTen: string;
+  // Ai là người ĐỌC email — quyết định xưng hô, cùng quy ước với sendCareerMapEmail.
+  audience: "student" | "parent";
+}): Promise<void> {
+  const transport = getTransport();
+  const forStudent = params.audience === "student";
+
+  const subject = `Quà tặng Checklist chọn ngành dành cho ${forStudent ? "con" : "ba mẹ"} — Tiara Edu`;
+
+  const greetingText = forStudent ? `Chào con ${params.hoTen},` : `Kính gửi ba mẹ,`;
+  const greetingHtml = forStudent
+    ? `Chào con <strong>${params.hoTen}</strong>,`
+    : `Kính gửi ba mẹ,`;
+
+  const introText = forStudent
+    ? `Sau vài ngày đọc bộ báo cáo định hướng, Tiara Edu muốn nghe con chia sẻ một chút trải nghiệm để cải thiện chất lượng báo cáo cho các bạn sau nhé.`
+    : `Sau vài ngày ba mẹ và con đọc bộ báo cáo định hướng, Tiara Edu muốn nghe ba mẹ chia sẻ một chút trải nghiệm để cải thiện chất lượng báo cáo cho các gia đình sau nhé.`;
+
+  const giftLineText = `Để cảm ơn, cuối bài khảo sát Tiara Edu có để sẵn link tải Checklist chọn ngành kèm hướng dẫn sử dụng — ${
+    forStudent ? "con" : "ba mẹ"
+  } làm xong là nhận ngay.`;
+  const giftLineHtml = `<p>Để cảm ơn, cuối bài khảo sát Tiara Edu có để sẵn link tải <strong>Checklist chọn ngành</strong> kèm hướng dẫn sử dụng — ${
+    forStudent ? "con" : "ba mẹ"
+  } làm xong là nhận ngay.</p>`;
+
+  const closingText = forStudent
+    ? `Cảm ơn con rất nhiều. Nếu có câu hỏi gì, con cứ nhắn lại để Thầy/Cô hỗ trợ thêm.`
+    : `Cảm ơn ba mẹ rất nhiều. Nếu có câu hỏi gì, ba mẹ cứ nhắn lại để Tiara Edu hỗ trợ thêm.`;
+
+  await transport.sendMail({
+    from: `"Tiara Edu" <${process.env.GMAIL_USER}>`,
+    to: params.to,
+    subject,
+    text: `${greetingText}\n\n${introText}\n\n${giftLineText}\n\nLàm khảo sát (3-5 phút): ${SURVEY_FORM_URL}\n\n${closingText}\n\nTrân trọng,\nTiara Edu`,
+    html: `<p>${greetingHtml}</p>
+<p>${introText}</p>
+${giftLineHtml}
+<p><a href="${SURVEY_FORM_URL}" style="display:inline-block;background:#111;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;">Làm khảo sát nhận quà</a></p>
+<p style="font-size:13px;color:#666;">Hoặc mở link: <a href="${SURVEY_FORM_URL}">${SURVEY_FORM_URL}</a></p>
+<p>${closingText}</p>
+<p>Trân trọng,<br/>Tiara Edu</p>`,
   });
 }

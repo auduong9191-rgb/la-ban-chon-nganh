@@ -107,8 +107,9 @@ export async function POST(req: NextRequest) {
           gateway: payload.gateway,
         })
       ),
-      // Trigger 2 — báo CTV nhóm 2 ngay khi có đơn mới thanh toán, để họ chủ
-      // động xuất Career Map thay vì chủ shop phải tự check rồi báo lại tay.
+      // Trigger 2 — báo CTV (cả 2 nhóm) ngay khi có đơn mới thanh toán, để họ
+      // chủ động chăm sóc/upsell (nhóm 2 xuất luôn Career Map) thay vì chủ
+      // shop phải tự check rồi báo lại tay.
       notifyCtvPaidOrder({
         ctvCode: lead.ctv_code,
         quizLeadId: lead.quiz_lead_id,

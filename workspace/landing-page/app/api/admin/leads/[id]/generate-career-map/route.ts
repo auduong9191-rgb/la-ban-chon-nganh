@@ -8,7 +8,9 @@
 // làm ngữ cảnh cho Gemini viết báo cáo "Chiến lược 360°" -> đổ vào khung
 // HTML/CSS chuẩn A4 -> render PDF (Puppeteer) -> lưu vào đúng chỗ đơn hàng
 // (tái dùng bucket + cột career_map_*/strategy_* đã có) -> gửi email đính
-// kèm CẢ 2 file (Career Map gốc + Chiến lược 360° PDF) cho khách qua Gmail SMTP.
+// kèm CẢ 2 file (Career Map gốc + Chiến lược 360° PDF) cho khách qua Gmail SMTP
+// -> gửi kèm ĐÚNG bộ file đó cho CTV giới thiệu (Trigger 3, cả 2 nhóm) để họ
+// chăm sóc/upsell tiếp mà không cần đợi khách share lại.
 
 import { readFile } from "fs/promises";
 import path from "path";
@@ -27,6 +29,7 @@ import {
 } from "@/lib/vakad-report-pdf-template";
 import { renderHtmlToPdf } from "@/lib/pdf";
 import { sendCareerMapEmail } from "@/lib/mailer";
+import { notifyCtvFullReports } from "@/lib/ctv";
 import { VAKAD_GROUP_LABEL, type VakadGroup } from "@/lib/vakad-questions";
 
 export const dynamic = "force-dynamic";
@@ -75,7 +78,7 @@ export async function POST(
   const { data: lead, error: leadError } = await supabaseAdmin
     .from("leads")
     .select(
-      `id, name, email,
+      `id, name, email, phone, ctv_code,
        quiz_leads(ho_ten, dob, khoi_hoc, hoc_luc, vakad_dominant, duong_doi, ngay_sinh, su_menh, linh_hon, free_report, has_vakad, parent_email, noi_o)`
     )
     .eq("id", id)
@@ -362,7 +365,7 @@ export async function POST(
   // bản riêng, đúng văn phong "ba mẹ", cùng đính kèm như bản gửi con. Gửi
   // song song với bản chính (2 lệnh gọi SMTP độc lập) để đỡ tốn thời gian —
   // lỗi ở bản này không ảnh hưởng tới bản đã gửi cho con.
-  const [mainEmailResult, parentEmailResult] = await Promise.allSettled([
+  const [mainEmailResult, parentEmailResult, ctvNotifyResult] = await Promise.allSettled([
     sendCareerMapEmail({
       to: lead.email,
       hoTen: quiz.ho_ten,
@@ -381,7 +384,21 @@ export async function POST(
           careerMapDownloadUrl,
         })
       : Promise.resolve(null),
+    // Trigger 3 — CTV giới thiệu (cả 2 nhóm) nhận đúng bộ file khách vừa nhận,
+    // để chăm sóc/upsell tiếp mà không cần đợi khách share lại.
+    notifyCtvFullReports({
+      ctvCode: lead.ctv_code,
+      hoTen: quiz.ho_ten,
+      tenPhuHuynh: lead.name,
+      phone: lead.phone,
+      email: lead.email,
+      attachments: emailAttachments,
+      careerMapDownloadUrl,
+    }),
   ]);
+  if (ctvNotifyResult.status === "rejected") {
+    console.error("[generate-career-map] ctv notify failed:", ctvNotifyResult.reason);
+  }
 
   let emailSent = false;
   let emailError: string | null = null;

@@ -1,6 +1,6 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase";
-import { sendFreeReportToCtv, sendPaidLeadToCtv } from "@/lib/mailer";
+import { sendFreeReportToCtv, sendPaidLeadToCtv, sendFullReportsToCtv } from "@/lib/mailer";
 
 export type Ctv = {
   ctv_code: string;
@@ -154,10 +154,11 @@ export async function notifyCtvFreeReport(params: {
 }
 
 /**
- * Trigger 2 — ngay khi đơn thanh toán thành công, nếu CTV giới thiệu thuộc
- * nhóm '2' (có xuất Career Map), gửi đầy đủ thông tin khách để CTV chủ động
- * xuất Career Map + tư vấn — không cần đợi chủ shop kiểm tra rồi báo lại.
- * No-op nếu không có ctv_code, CTV không active, hoặc CTV thuộc nhóm 1.
+ * Trigger 2 — ngay khi đơn thanh toán thành công, gửi đầy đủ thông tin khách
+ * cho CTV giới thiệu (cả nhóm 1 lẫn nhóm 2) — nhóm nào cũng cần biết để tiếp
+ * tục chăm sóc/upsell, không chỉ riêng nhóm 2 phải xuất Career Map. Nội dung
+ * mail khác nhau theo group_type (xem sendPaidLeadToCtv). No-op nếu không có
+ * ctv_code hoặc CTV không active.
  */
 export async function notifyCtvPaidOrder(params: {
   ctvCode: string | null | undefined;
@@ -170,7 +171,7 @@ export async function notifyCtvPaidOrder(params: {
   paidAt: string;
 }): Promise<void> {
   const ctv = await findActiveCtv(params.ctvCode);
-  if (!ctv || ctv.group_type !== "2") return;
+  if (!ctv) return;
 
   let quizFields = {
     hoTen: "—",
@@ -212,6 +213,7 @@ export async function notifyCtvPaidOrder(params: {
   await sendPaidLeadToCtv({
     to: ctv.email,
     ctvName: ctv.name,
+    groupType: ctv.group_type,
     hoTen: quizFields.hoTen,
     dob: quizFields.dob,
     khoiHoc: quizFields.khoiHoc,
@@ -223,5 +225,35 @@ export async function notifyCtvPaidOrder(params: {
     amount: params.amount,
     paidAt: paidAtDisplay,
     freeReport: quizFields.freeReport,
+  });
+}
+
+/**
+ * Trigger 3 — ngay khi trọn bộ báo cáo (Career Map + Chiến lược + Xu hướng
+ * Học tập nếu có) vừa gửi xong cho khách, gửi ĐÚNG bộ file đó cho CTV giới
+ * thiệu (cả 2 nhóm) để họ chăm sóc/upsell tiếp — không cần đợi khách share
+ * lại hay hỏi chủ shop. No-op nếu không có ctv_code hoặc CTV không active.
+ */
+export async function notifyCtvFullReports(params: {
+  ctvCode: string | null | undefined;
+  hoTen: string;
+  tenPhuHuynh: string;
+  phone: string;
+  email: string;
+  attachments: { fileName: string; pdfBuffer: Buffer }[];
+  careerMapDownloadUrl?: string;
+}): Promise<void> {
+  const ctv = await findActiveCtv(params.ctvCode);
+  if (!ctv) return;
+
+  await sendFullReportsToCtv({
+    to: ctv.email,
+    ctvName: ctv.name,
+    hoTen: params.hoTen,
+    tenPhuHuynh: params.tenPhuHuynh,
+    phone: params.phone,
+    email: params.email,
+    attachments: params.attachments,
+    careerMapDownloadUrl: params.careerMapDownloadUrl,
   });
 }

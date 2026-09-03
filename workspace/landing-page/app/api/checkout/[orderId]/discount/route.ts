@@ -84,9 +84,9 @@ export async function POST(
 
     // Non-blocking — chị Dương cần biết để chủ động tạo báo cáo dù không có
     // giao dịch ngân hàng nào để đối chiếu qua webhook. Đồng thời báo CTV
-    // (nếu có, nhóm 2) giống hệt luồng thanh toán qua Sepay thật (Trigger 2)
+    // (nếu có, cả 2 nhóm) giống hệt luồng thanh toán qua Sepay thật (Trigger 2)
     // — đơn miễn phí 100% qua mã giảm giá cũng là 1 đơn đã "chốt", CTV vẫn
-    // cần biết để chủ động xuất Career Map.
+    // cần biết để chủ động chăm sóc/upsell (nhóm 2 xuất luôn Career Map).
     Promise.allSettled([
       sendTelegramNotification(
         `🎁 Mã giảm giá 100% (${normalizedCode}) vừa được áp dụng — đơn ${orderId}\n` +
