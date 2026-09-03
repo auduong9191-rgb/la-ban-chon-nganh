@@ -311,19 +311,20 @@ export async function extractCareerMapInsights(
 // phương án tại chỗ; học sinh tỉnh khác học lực cao (TB ước lượng ≥ 8.0) mới
 // được gợi ý PA1 ở 1 trong 2 đại đô thị, còn học lực thấp hơn thì cả 3 phương
 // án đều ưu tiên trường vùng/địa phương để tránh gánh nặng chi phí ở trọ xa
-// nhà. Bảng 1 + Bảng 2 cũ (Phần III) GỘP LẠI thành 1 bảng ma trận duy nhất
-// mỗi ngành x 3 phương án (Trường + Địa điểm + Học phí + Phương thức xét
-// tuyển chung 1 ô) để đối chiếu năng lực-tài chính-địa lý cùng lúc; Bảng 2
-// mới đổi thành bảng chiến lược tài chính/địa lý TỔNG QUÁT theo cấp độ PA
-// (3 dòng cố định PA1/PA2/PA3, không lặp lại theo từng ngành).
+// nhà. Bảng 1 và Bảng 2 (Phần III) VẪN TÁCH RIÊNG như thiết kế gốc (chị
+// Dương yêu cầu rõ học phí phải nằm ở bảng riêng, không gộp chung với
+// trường/điểm chuẩn/PTXT) — chỉ thêm "Địa điểm/cơ sở đào tạo" vào mỗi ô
+// Trường ở Bảng 1, và thêm cân nhắc chênh lệch sinh hoạt phí theo địa điểm đó
+// vào mỗi ô ở Bảng 2 (vẫn 5 dòng theo đúng thứ tự ngành như Bảng 1, KHÔNG
+// đổi thành bảng tổng quát 3 dòng theo cấp PA).
 //
 // LƯU Ý KỸ THUẬT (không có trong bản chị Dương gửi, tự thêm khi wire code):
 // bản chị Dương paste dùng thẻ "<br>" để xuống dòng trong 1 ô bảng cho dễ đọc,
 // nhưng markdownToHtml() (lib/markdown-to-html.ts) là parser tự viết — KHÔNG
 // hỗ trợ thẻ HTML (kể cả <br>, sẽ escape thành chữ "<br>" hiện ra thật trong
 // PDF) và bảng GFM ở đây bắt buộc mỗi dòng markdown = đúng 1 dòng vật lý. Vì
-// vậy các thành phần trong 1 ô (Trường/Địa điểm/Học phí/PTXT) phải nối trên
-// CÙNG 1 DÒNG bằng dấu ";" — nội dung giữ nguyên, chỉ đổi cách ngắt dòng.
+// vậy các thành phần trong 1 ô (Trường/Địa điểm/PTXT ở Bảng 1, Học phí/Chiến
+// lược ở Bảng 2) phải nối trên CÙNG 1 DÒNG bằng dấu ";" khi cần liệt kê nhiều ý.
 //
 // Giữ lại khối NLP + nguyên tắc "không tự tính lại số" + 2 chế độ VAKAD từ
 // bản trước — chị Dương không gửi lại các phần này trong các bản paste sau
@@ -348,14 +349,14 @@ NGUYÊN TẮC NEO THỜI GIAN, TRA CỨU NGUỒN & CHỐNG BỊA ĐẶT (QUAN TR
 2. Ngay dưới Bảng 1 (Phần III), BẮT BUỘC thêm 2 dòng trích dẫn/khuyến cáo in nghiêng đúng mẫu (mỗi dòng 1 đoạn riêng):
    - "*Số liệu trích xuất từ Đề án tuyển sinh & Bảng điểm chuẩn chính thức niên khóa [niên khóa cho sẵn] của các trường (tra cứu qua Google Search). Điểm chuẩn thực tế có thể dao động ±0.5-1.5 điểm tùy chỉ tiêu và độ phân hóa đề thi từng năm.*"
    - "*Số liệu trong bảng mang tính chất tham khảo. Ba mẹ và con vui lòng kiểm tra lại thông tin trực tiếp với trường để có số liệu chính xác nhất tại thời điểm đăng ký.*"
-3. Bảng 1 (Phần III) giờ là bảng MA TRẬN GỘP — mỗi ô Trường ở PA1/PA2/PA3 phải chứa ĐỦ 4 thành phần theo ĐÚNG thứ tự sau, nối với nhau bằng dấu ";" trên CÙNG 1 DÒNG DUY NHẤT (TUYỆT ĐỐI không xuống dòng thật, không dùng thẻ HTML như "<br>" — bảng ở đây chỉ đọc được đúng 1 dòng vật lý cho mỗi ô):
+   Ngay dưới Bảng 2 (Phần III), BẮT BUỘC thêm riêng 1 dòng trích dẫn in nghiêng: "*Số liệu học phí mang tính chất tham khảo theo mặt bằng chung niên khóa [niên khóa cho sẵn]. Ba mẹ và con vui lòng kiểm tra lại thông tin trực tiếp với trường để có số liệu chính xác nhất tại thời điểm đăng ký.*"
+3. Bảng 1 (Phần III) CHỈ nói về trường, địa điểm & phương thức xét tuyển — TUYỆT ĐỐI KHÔNG nhắc học phí trong Bảng 1 (học phí chuyển hết sang Bảng 2, đúng nguyên tắc "học phí là bảng riêng"). Mỗi ô Trường ở PA1/PA2/PA3 phải chứa ĐỦ 3 thành phần theo ĐÚNG thứ tự sau, nối với nhau bằng dấu ";" trên CÙNG 1 DÒNG DUY NHẤT (TUYỆT ĐỐI không xuống dòng thật, không dùng thẻ HTML như "<br>"):
    (a) Tên trường + điểm chuẩn viết **in đậm** để làm nổi bật điểm đầu vào;
    (b) Địa điểm/cơ sở đào tạo (ghi rõ tỉnh/thành phố, tuân theo QUY TẮC ĐỊNH TUYẾN ĐỊA LÝ ở mục 6 bên dưới);
-   (c) Học phí (ghi rõ đơn vị triệu VNĐ/năm hoặc triệu VNĐ/kỳ, và hệ đào tạo Chuẩn/Chất lượng cao/Quốc tế);
-   (d) tối thiểu 2 trong số các phương thức xét tuyển sau, kèm điều kiện cụ thể: Điểm thi tốt nghiệp THPT (thang 30); Xét tuyển kết hợp Chứng chỉ ngoại ngữ (IELTS/TOEFL) + học bạ hoặc điểm thi (ghi rõ mốc IELTS và điểm sàn học bạ yêu cầu); Kỳ thi Đánh giá năng lực/Tư duy (HSA/TSA/ĐGNL ĐHQG-HCM...) theo đúng thang điểm của kỳ thi đó; Xét Học bạ THPT (tổng điểm tổ hợp 3/5/6 kỳ hoặc GPA yêu cầu); Xét tuyển thẳng/Phỏng vấn/Portfolio (ưu tiên dùng cho trường quốc tế, khối năng khiếu).
-4. Bảng 2 (Phần III) KHÔNG còn lặp lại theo từng ngành như bản cũ — là bảng CHIẾN LƯỢC TỔNG QUÁT đúng 3 dòng cố định theo cấp độ PA1/PA2/PA3 (không phải theo ngành): mỗi dòng mô tả nhóm trường/môi trường địa lý tương ứng, chiến lược học bổng, ước tính chênh lệch sinh hoạt phí giữa học gần nhà và học xa nhà, và lợi thế cạnh tranh. Cột "Lợi thế cạnh tranh của con" BẮT BUỘC cá nhân hoá theo dữ liệu năng lực/thần số học của con ở Phần I, không được chép nguyên văn công thức chung.
+   (c) tối thiểu 2 trong số các phương thức xét tuyển sau, kèm điều kiện cụ thể: Điểm thi tốt nghiệp THPT (thang 30); Xét tuyển kết hợp Chứng chỉ ngoại ngữ (IELTS/TOEFL) + học bạ hoặc điểm thi (ghi rõ mốc IELTS và điểm sàn học bạ yêu cầu); Kỳ thi Đánh giá năng lực/Tư duy (HSA/TSA/ĐGNL ĐHQG-HCM...) theo đúng thang điểm của kỳ thi đó; Xét Học bạ THPT (tổng điểm tổ hợp 3/5/6 kỳ hoặc GPA yêu cầu); Xét tuyển thẳng/Phỏng vấn/Portfolio (ưu tiên dùng cho trường quốc tế, khối năng khiếu).
+4. Bảng 2 (Phần III) là BẢNG RIÊNG cho học phí + chiến lược tối ưu tài chính — TÁCH KHỎI Bảng 1, dùng ĐÚNG 5 chuyên ngành và ĐÚNG thứ tự PA1/PA2/PA3 như Bảng 1 (để đối chiếu song song 2 bảng theo cùng số thứ tự, KHÔNG rút gọn thành bảng tổng quát theo cấp PA). Mỗi ô ở Bảng 2 BẮT ĐẦU bằng mức học phí viết **in đậm** để làm nổi bật (ghi rõ đơn vị tính triệu VNĐ/năm hoặc triệu VNĐ/kỳ, và hệ đào tạo Chuẩn/Chất lượng cao/Quốc tế), sau đó tới chiến lược/điều kiện học bổng, và BẮT BUỘC thêm 1 ý ngắn về chênh lệch sinh hoạt phí dựa trên Địa điểm đã chọn ở ô tương ứng của Bảng 1 (ví dụ: cộng thêm chi phí ở trọ/di chuyển nếu địa điểm đó xa nơi ở của con, hoặc ghi rõ "không phát sinh thêm" nếu địa điểm đó ngay tại nơi con ở) — mọi ý trong 1 ô vẫn nối bằng dấu ";" trên CÙNG 1 DÒNG DUY NHẤT.
 5. Tên ngành, mã ngành, tên trường BẮT BUỘC là ngành/trường có thật và hiện đang đào tạo đúng ngành đó trên thực tế — tuyệt đối không bịa đặt tên trường hay mã ngành không tồn tại.
-6. QUY TẮC ĐỊNH TUYẾN ĐỊA LÝ THEO HỌC LỰC & VỊ TRÍ CƯ TRÚ (áp dụng cho mọi ô Trường ở cả Bảng 1 và Bảng 2, Phần III) — căn cứ đúng dòng "Nơi ở hiện tại của con" và điểm TB đại diện đã cho sẵn trong dữ liệu đầu vào, KHÔNG tự suy diễn khác đi:
+6. QUY TẮC ĐỊNH TUYẾN ĐỊA LÝ THEO HỌC LỰC & VỊ TRÍ CƯ TRÚ (Phần III) — áp dụng khi chọn Trường + Địa điểm ở Bảng 1, và khi ước tính chênh lệch sinh hoạt phí theo địa điểm đó ở Bảng 2 — căn cứ đúng dòng "Nơi ở hiện tại của con" và điểm TB đại diện đã cho sẵn trong dữ liệu đầu vào, KHÔNG tự suy diễn khác đi:
    * Nhóm 1 — Con đang ở Hà Nội hoặc TP. Hồ Chí Minh: cả 3 phương án (Bứt phá/Vừa sức/An toàn) đều ưu tiên gợi ý trường đóng trên chính địa bàn đó, tránh phát sinh chi phí ở trọ xa nhà không cần thiết.
    * Nhóm 2 — Con ở tỉnh/thành khác:
      - Trường hợp A (điểm TB đại diện ≥ 8.0 — năng lực xuất sắc): PA1 (Bứt phá) được phép gợi ý trường Top đầu/ĐH Quốc tế tại 1 trong 2 đại đô thị (Hà Nội cho khu vực phía Bắc/Bắc Trung Bộ, TP.HCM cho khu vực Nam Trung Bộ/Tây Nguyên/Nam Bộ); PA2 (Vừa sức) ưu tiên ĐH trọng điểm vùng/ĐH thuộc thành phố trực thuộc Trung ương gần nơi con ở nhất (ví dụ: ĐH Thái Nguyên, ĐH Hải Phòng, ĐH Hàng Hải, ĐH Vinh, ĐH Huế, ĐH Đà Nẵng, ĐH Quy Nhơn, ĐH Tây Nguyên, ĐH Cần Thơ...) hoặc phân hiệu chất lượng cao lân cận; PA3 (An toàn) ưu tiên trường/cao đẳng ngay tại tỉnh nhà hoặc thành phố lân cận.
@@ -416,29 +417,33 @@ CẤU TRÚC BẮT BUỘC:
 
 ### PHẦN III: MA TRẬN 5 CHUYÊN NGÀNH THEO 3 PHƯƠNG ÁN TRƯỜNG, ĐIỀU KIỆN XÉT TUYỂN & HỌC PHÍ
 
-#### 1. Bảng Ma trận 5 Chuyên ngành x 3 Phương án Trường, Địa điểm, Học phí & Phương thức Xét tuyển
-Mỗi ô PA1/PA2/PA3 viết trên ĐÚNG 1 dòng, nối 4 thành phần (Trường+Điểm chuẩn / Địa điểm / Học phí / Phương thức xét tuyển) bằng dấu ";" — không xuống dòng thật, không dùng "<br>".
+#### 1. Bảng Trường, Địa điểm & Phương thức Xét tuyển theo 5 Chuyên ngành x 3 Phương án
+Mỗi ô PA1/PA2/PA3 viết trên ĐÚNG 1 dòng, nối 3 thành phần (Trường+Điểm chuẩn / Địa điểm / Phương thức xét tuyển) bằng dấu ";" — KHÔNG nhắc học phí ở bảng này, không xuống dòng thật, không dùng "<br>".
 
 | STT | Tên Chuyên ngành & Độ hợp | Reality Check (Áp lực nghề) | PA1: BỨT PHÁ (Mơ ước ~[điểm PA1 cho sẵn]đ) | PA2: VỪA SỨC (Phù hợp ~[điểm PA2 cho sẵn]đ) | PA3: AN TOÀN (Dự phòng ~[điểm PA3 cho sẵn]đ) |
 |---|---|---|---|---|---|
-| 1 | [Tên Ngành 1] — Độ hợp: [X/10] | [Thách thức nghề nghiệp đối chiếu với tử huyệt cảm xúc] | **[Tên Trường Top/ĐH Quốc tế] — Điểm chuẩn: ~[PA1]đ**; Địa điểm: [Tỉnh/Thành phố cơ sở đào tạo, đúng Quy tắc Định tuyến Địa lý]; Học phí: ~[A] tr/kỳ (hệ Quốc tế/Chất lượng cao); Kết hợp: IELTS [X.X]+ & học bạ ≥[Y.Y]; ĐGNL ≥[Z]đ | **[Tên Trường Chuẩn] — Điểm chuẩn: ~[PA2]đ**; Địa điểm: [Tỉnh/Thành phố cơ sở đào tạo]; Học phí: ~[B] tr/năm (hệ Chuẩn); Học bạ: tổng 3 môn ≥[X]đ; ĐGNL ≥[Y]đ | **[Tên Trường CĐ/Nghề/ĐH Ứng dụng] — Điểm chuẩn: ~[PA3]đ**; Địa điểm: [Tỉnh/Thành phố cơ sở đào tạo, ưu tiên gần nhà]; Học phí: ~[C] tr/năm; Học bạ: GPA ≥[X]; Xét tuyển thẳng: đăng ký sớm |
+| 1 | [Tên Ngành 1] — Độ hợp: [X/10] | [Thách thức nghề nghiệp đối chiếu với tử huyệt cảm xúc] | **[Tên Trường Top/ĐH Quốc tế] — Điểm chuẩn: ~[PA1]đ**; Địa điểm: [Tỉnh/Thành phố cơ sở đào tạo, đúng Quy tắc Định tuyến Địa lý]; Kết hợp: IELTS [X.X]+ & học bạ ≥[Y.Y]; ĐGNL ≥[Z]đ | **[Tên Trường Chuẩn] — Điểm chuẩn: ~[PA2]đ**; Địa điểm: [Tỉnh/Thành phố cơ sở đào tạo]; Học bạ: tổng 3 môn ≥[X]đ; ĐGNL ≥[Y]đ | **[Tên Trường CĐ/Nghề/ĐH Ứng dụng] — Điểm chuẩn: ~[PA3]đ**; Địa điểm: [Tỉnh/Thành phố cơ sở đào tạo, ưu tiên gần nhà]; Học bạ: GPA ≥[X]; Xét tuyển thẳng: đăng ký sớm |
 | 2 | ... | ... | ... | ... | ... |
 | 3 | ... | ... | ... | ... | ... |
 | 4 | ... | ... | ... | ... | ... |
 | 5 | ... | ... | ... | ... | ... |
 
-*Số liệu điểm chuẩn và học phí trích xuất từ Đề án tuyển sinh & Thông báo học phí chính thức niên khóa [niên khóa cho sẵn] của các trường (tra cứu qua Google Search). Điểm chuẩn thực tế có thể dao động ±0.5-1.5 điểm tùy chỉ tiêu và độ phân hóa đề thi từng năm.*
+*Số liệu trích xuất từ Đề án tuyển sinh & Bảng điểm chuẩn chính thức niên khóa [niên khóa cho sẵn] của các trường (tra cứu qua Google Search). Điểm chuẩn thực tế có thể dao động ±0.5-1.5 điểm tùy chỉ tiêu và độ phân hóa đề thi từng năm.*
 
 *Số liệu trong bảng mang tính chất tham khảo. Ba mẹ và con vui lòng kiểm tra lại thông tin trực tiếp với trường để có số liệu chính xác nhất tại thời điểm đăng ký.*
 
-#### 2. Bảng Chiến lược Tối ưu Tài chính, Học bổng & Chi phí Vị trí Địa lý
-Đúng 3 dòng cố định theo cấp độ Phương án (không lặp lại theo từng ngành).
+#### 2. Bảng Học phí & Chiến lược Tối ưu Tài chính theo 5 Chuyên ngành x 3 Phương án
+Đúng 5 chuyên ngành, ĐÚNG thứ tự PA1/PA2/PA3 như Bảng 1 phía trên (để đối chiếu song song theo cùng số thứ tự) — mỗi ô viết trên ĐÚNG 1 dòng, nối các ý bằng dấu ";".
 
-| Cấp độ Phương án | Nhóm trường & Môi trường Địa lý | Chiến lược Học bổng & Cân đối Sinh hoạt phí | Lợi thế cạnh tranh của con |
-|---|---|---|---|
-| **Phương án 1: BỨT PHÁ** (Cao hơn năng lực) | [Mô tả ngắn nhóm trường/khu vực địa lý đã chọn ở PA1 Bảng 1 phía trên] | [Điều kiện săn học bổng cụ thể theo GPA/IELTS/phỏng vấn; nếu PA1 khiến con phải học xa nhà thì ước tính thêm chi phí sinh hoạt/tháng, nếu vẫn ở gần nhà thì ghi rõ không phát sinh] | [1 dòng cá nhân hoá theo Đường Đời/Sứ Mệnh/Linh Hồn của con ở Phần I lý giải vì sao con đủ sức theo phương án này] |
-| **Phương án 2: VỪA SỨC** (Đúng năng lực) | [Mô tả ngắn nhóm trường/khu vực địa lý đã chọn ở PA2 Bảng 1 phía trên] | [Điều kiện học bổng khuyến khích theo kỳ dựa trên GPA; so sánh mức tiết kiệm sinh hoạt phí nếu học gần nhà hơn PA1] | [1 dòng cá nhân hoá tương tự, nhấn mạnh sự ổn định phù hợp năng lực hiện tại] |
-| **Phương án 3: AN TOÀN** (Thoải mái làm được) | [Mô tả ngắn nhóm trường/khu vực địa lý đã chọn ở PA3 Bảng 1 phía trên, ưu tiên tại tỉnh nhà] | [Ước tính % hoặc số tiền tiết kiệm học phí + sinh hoạt phí so với PA1/PA2 do học gần nhà, thời gian đào tạo ngắn hơn nếu có] | [1 dòng cá nhân hoá nhấn mạnh lợi thế an toàn tài chính và tốc độ ra nghề] |
+| STT | Tên Chuyên ngành | PA1: BỨT PHÁ — Học phí & Tối ưu tài chính | PA2: VỪA SỨC — Học phí & Tối ưu tài chính | PA3: AN TOÀN — Học phí & Tối ưu tài chính |
+|---|---|---|---|---|
+| 1 | [Tên Ngành 1] | **Học phí: ~[A] tr/kỳ** (hệ Quốc tế/Chất lượng cao); Săn Học bổng Tài năng/Tuyển sinh [Z]% — điều kiện GPA ≥8.5, IELTS 6.5-7.5+, bài luận & phỏng vấn; [nếu Địa điểm PA1 ở Bảng 1 xa nơi con ở: ước tính thêm chi phí sinh hoạt/ở trọ ~[D] tr/tháng, ngược lại ghi "không phát sinh thêm vì học gần nhà"] | **Học phí: ~[B] tr/năm** (hệ Chuẩn); Học bổng khuyến khích theo kỳ — duy trì GPA top 5-10% của khoa để nhận hỗ trợ 50-100% học phí từng kỳ; [tương tự, ghi cân nhắc sinh hoạt phí theo Địa điểm PA2 ở Bảng 1] | **Học phí: ~[C] tr/năm**; tiết kiệm 40-60% chi phí so với ĐH 4 năm, đào tạo 2-2.5 năm, sớm đi làm tự chủ tài chính; [tương tự, ghi cân nhắc sinh hoạt phí theo Địa điểm PA3 ở Bảng 1, thường thấp nhất vì ưu tiên gần nhà] |
+| 2 | ... | ... | ... | ... |
+| 3 | ... | ... | ... | ... |
+| 4 | ... | ... | ... | ... |
+| 5 | ... | ... | ... | ... |
+
+*Số liệu học phí mang tính chất tham khảo theo mặt bằng chung niên khóa [niên khóa cho sẵn]. Ba mẹ và con vui lòng kiểm tra lại thông tin trực tiếp với trường để có số liệu chính xác nhất tại thời điểm đăng ký.*
 
 #### 3. Bảng Lộ trình Phối hợp Phương thức Xét tuyển Tối ưu (Đồng hành cùng Tiara Edu)
 | Phương thức xét tuyển | Mục tiêu trường nhắm tới | Điều kiện cần hoàn thiện | Kế hoạch hành động bứt phá cùng Tiara Edu |
