@@ -54,6 +54,9 @@ export function QuizApp() {
   const [dob, setDob] = useState("");
   const [khoiHoc, setKhoiHoc] = useState("");
   const [hocLuc, setHocLuc] = useState("");
+  // Tỉnh/thành phố nơi con đang sinh sống — dùng để báo cáo Chiến lược 360°
+  // (Phần III) gợi ý trường sát với vị trí thực tế thay vì chỉ dựa điểm chuẩn.
+  const [noiO, setNoiO] = useState("");
   const [form2Error, setForm2Error] = useState("");
 
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -113,6 +116,10 @@ export function QuizApp() {
       setForm2Error("Vui lòng chọn học lực hiện tại.");
       return;
     }
+    if (!noiO.trim()) {
+      setForm2Error("Vui lòng nhập tỉnh/thành phố nơi con đang sinh sống.");
+      return;
+    }
     setForm2Error("");
     setStep("questions");
   }
@@ -147,6 +154,10 @@ export function QuizApp() {
       setForm2Error("Ba mẹ vui lòng chọn học lực hiện tại của con.");
       return;
     }
+    if (!noiO.trim()) {
+      setForm2Error("Ba mẹ vui lòng nhập tỉnh/thành phố nơi con đang sinh sống.");
+      return;
+    }
     if (tenPhuHuynh.trim().length < 2) {
       setForm2Error("Ba mẹ vui lòng nhập họ và tên phụ huynh.");
       return;
@@ -179,6 +190,7 @@ export function QuizApp() {
           dob,
           khoiHoc,
           hocLuc,
+          noiO: noiO.trim(),
           email: email.trim(),
           phone: phone.trim(),
           ctvCode,
@@ -226,6 +238,7 @@ export function QuizApp() {
           dob,
           khoiHoc,
           hocLuc,
+          noiO: noiO.trim(),
           email: email.trim(),
           phone: phone.trim(),
           parentEmail: parentEmail.trim() || undefined,
@@ -491,6 +504,23 @@ export function QuizApp() {
 
           <div>
             <label className="block text-sm font-medium text-ink mb-1">
+              Tỉnh/Thành phố nơi con đang sinh sống
+            </label>
+            <input
+              type="text"
+              required
+              value={noiO}
+              onChange={(e) => setNoiO(e.target.value)}
+              placeholder="VD: TP. Hồ Chí Minh, Hà Nội, Đà Nẵng..."
+              className="w-full rounded-lg border border-border-soft px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <p className="text-xs text-ink-soft mt-1">
+              Giúp gợi ý trường và phương án đi lại/ở trọ sát với vị trí thực tế của con hơn.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-ink mb-1">
               Họ và tên phụ huynh
             </label>
             <input
@@ -650,6 +680,23 @@ export function QuizApp() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-ink mb-1">
+              Tỉnh/Thành phố nơi con đang sinh sống
+            </label>
+            <input
+              type="text"
+              required
+              value={noiO}
+              onChange={(e) => setNoiO(e.target.value)}
+              placeholder="VD: TP. Hồ Chí Minh, Hà Nội, Đà Nẵng..."
+              className="w-full rounded-lg border border-border-soft px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <p className="text-xs text-ink-soft mt-1">
+              Giúp gợi ý trường và phương án đi lại/ở trọ sát với vị trí thực tế của con hơn.
+            </p>
           </div>
 
           {form2Error && (

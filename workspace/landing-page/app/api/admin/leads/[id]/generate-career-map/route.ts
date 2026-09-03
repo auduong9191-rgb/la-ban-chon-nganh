@@ -76,7 +76,7 @@ export async function POST(
     .from("leads")
     .select(
       `id, name, email,
-       quiz_leads(ho_ten, dob, khoi_hoc, hoc_luc, vakad_dominant, duong_doi, ngay_sinh, su_menh, linh_hon, free_report, parent_email)`
+       quiz_leads(ho_ten, dob, khoi_hoc, hoc_luc, vakad_dominant, duong_doi, ngay_sinh, su_menh, linh_hon, free_report, has_vakad, parent_email, noi_o)`
     )
     .eq("id", id)
     .maybeSingle();
@@ -140,7 +140,12 @@ export async function POST(
   const vakadDominantLabel = quiz.vakad_dominant
     ? VAKAD_GROUP_LABEL[quiz.vakad_dominant as VakadGroup]
     : null;
-  const hasVakad = !!quiz.free_report;
+  // Cờ chuẩn để biết đơn này có làm bài test VAKAD hay không là cột `has_vakad`
+  // (thêm riêng cho mục đích này ở migration quiz-leads-allow-no-vakad) — TRƯỚC
+  // ĐÂY code suy luận nhầm qua `!!quiz.free_report`, nên nếu free_report vì lý
+  // do nào đó bị rỗng (dữ liệu cũ/lỗi) dù học sinh đã làm bài test, hệ thống
+  // vẫn âm thầm chỉ gửi 2/3 báo cáo (thiếu Xu hướng Học tập) mà không báo lỗi.
+  const hasVakad = !!quiz.has_vakad;
 
   // 2a. Gemini đọc file PDF gốc, trích insight nội bộ (không phải báo cáo
   // gửi khách) — bước này phải chạy trước vì Chiến lược 360° cần dùng kết quả.
@@ -171,6 +176,7 @@ export async function POST(
       suMenh: quiz.su_menh,
       linhHon: quiz.linh_hon,
       ngaySinh: quiz.ngay_sinh,
+      noiO: quiz.noi_o ?? null,
       careerMapInsights,
     });
   } catch (err) {
@@ -217,7 +223,15 @@ export async function POST(
   // Xu hướng Học tập (Gem 1, free_report) — trước đây báo cáo này chỉ hiện
   // trên web, giờ gửi kèm email luôn thành báo cáo thứ 3 trong bộ.
   let vakadReportPdfBuffer: Buffer | null = null;
-  if (hasVakad && vakadDominantLabel) {
+  if (hasVakad && (!vakadDominantLabel || !quiz.free_report)) {
+    // has_vakad=true nhưng thiếu vakad_dominant/free_report (dữ liệu cũ/lỗi
+    // ở bước quiz submit) — không thể dựng báo cáo thứ 3, log rõ để xử lý tay
+    // thay vì âm thầm gửi thiếu cho khách.
+    console.error(
+      `[generate-career-map] lead ${id}: has_vakad=true nhưng thiếu vakad_dominant hoặc free_report — bỏ qua báo cáo Xu hướng Học tập, cần kiểm tra tay.`
+    );
+  }
+  if (hasVakad && vakadDominantLabel && quiz.free_report) {
     try {
       const [tiaraLogoDataUri, geinLogoDataUri] = await Promise.all([
         logoDataUri("tiara-edu-logo.png"),
@@ -338,6 +352,11 @@ export async function POST(
   const careerMapDownloadUrl = careerMapTooLargeForEmail
     ? careerMapSigned.data?.signedUrl ?? undefined
     : undefined;
+  // Nguồn sự thật cho lời văn email ("trọn bộ 3 báo cáo" hay 2) phải là việc
+  // file VAKAD PDF có thực sự dựng được hay không — không dùng lại `hasVakad`
+  // thô, để tránh trường hợp has_vakad=true nhưng bước 3b lỗi/bị bỏ qua ở
+  // trên mà email vẫn hứa 3 trong khi chỉ đính kèm 2.
+  const emailHasVakad = !!vakadReportPdfBuffer;
 
   // Luồng học sinh có để lại email phụ huynh (không bắt buộc) — gửi thêm 1
   // bản riêng, đúng văn phong "ba mẹ", cùng đính kèm như bản gửi con. Gửi
@@ -348,7 +367,7 @@ export async function POST(
       to: lead.email,
       hoTen: quiz.ho_ten,
       audience: hasVakad ? "student" : "parent",
-      hasVakad,
+      hasVakad: emailHasVakad,
       attachments: emailAttachments,
       careerMapDownloadUrl,
     }),

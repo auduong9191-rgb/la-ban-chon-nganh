@@ -34,13 +34,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { hoTen, tenPhuHuynh, dob, khoiHoc, hocLuc, email, phone, parentEmail, vakadAnswers, ctvCode } =
+  const { hoTen, tenPhuHuynh, dob, khoiHoc, hocLuc, noiO, email, phone, parentEmail, vakadAnswers, ctvCode } =
     (body ?? {}) as {
       hoTen?: string;
       tenPhuHuynh?: string;
       dob?: string;
       khoiHoc?: string;
       hocLuc?: string;
+      // Tỉnh/thành phố nơi con đang sinh sống — dùng để báo cáo Chiến lược
+      // 360° gợi ý trường sát vị trí thực tế thay vì chỉ dựa điểm chuẩn.
+      noiO?: string;
       email?: string;
       phone?: string;
       // Chỉ dùng ở luồng học sinh — không bắt buộc. Nếu có, báo cáo trả phí
@@ -80,6 +83,12 @@ export async function POST(request: NextRequest) {
   if (!hocLuc) {
     return NextResponse.json(
       { error: "Vui lòng chọn học lực." },
+      { status: 400 }
+    );
+  }
+  if (!noiO || !noiO.trim()) {
+    return NextResponse.json(
+      { error: "Vui lòng nhập tỉnh/thành phố nơi con đang sinh sống." },
       { status: 400 }
     );
   }
@@ -155,6 +164,7 @@ export async function POST(request: NextRequest) {
       dob,
       khoi_hoc: khoiHoc,
       hoc_luc: hocLuc,
+      noi_o: noiO.trim(),
       email: email.trim(),
       phone: phone.trim(),
       parent_email: parentEmail?.trim() || null,

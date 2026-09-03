@@ -12,6 +12,7 @@ type QuizJoin = {
   dob: string;
   khoi_hoc: string;
   hoc_luc: string;
+  noi_o: string | null;
   // null = luồng phụ huynh (bỏ qua bài test VAKAD, đi thẳng thanh toán)
   vakad_dominant: string | null;
   duong_doi: number;
@@ -70,6 +71,7 @@ type QuizLead = {
   dob: string;
   khoi_hoc: string;
   hoc_luc: string;
+  noi_o: string | null;
   email: string | null;
   phone: string | null;
   vakad_dominant: string | null;
@@ -127,6 +129,7 @@ export default function AdminPage() {
           emailError: string | null;
           parentEmailSent: boolean | null;
           parentEmailError: string | null;
+          vakad_report_file_url: string | null;
         }
       | undefined
     >
@@ -211,6 +214,7 @@ export default function AdminPage() {
       `SĐT (Zalo): ${lead.phone ?? "—"}`,
       `Khối học: ${lead.khoi_hoc}`,
       `Học lực: ${lead.hoc_luc}`,
+      `Nơi ở: ${lead.noi_o ?? "—"}`,
       `Đường Đời: ${lead.duong_doi} | Sứ Mệnh: ${lead.su_menh ?? "—"} | Linh Hồn: ${lead.linh_hon ?? "—"} | Ngày Sinh: ${lead.ngay_sinh} | VAKAD: ${lead.vakad_dominant ?? "Chưa làm bài test"}`,
       "",
       lead.free_report ?? "(Chưa làm bài test VAKAD — luồng phụ huynh)",
@@ -229,6 +233,7 @@ export default function AdminPage() {
       `Ngày sinh: ${q.dob}`,
       `Khối học: ${q.khoi_hoc}`,
       `Học lực: ${q.hoc_luc}`,
+      `Nơi ở: ${q.noi_o ?? "—"}`,
       `Đường Đời: ${q.duong_doi} | Sứ Mệnh: ${q.su_menh ?? "—"} | Linh Hồn: ${q.linh_hon ?? "—"} | Ngày Sinh: ${q.ngay_sinh} | VAKAD: ${q.vakad_dominant ?? "Chưa làm bài test"}`,
       "",
       "--- Báo cáo free (tham khảo, không dùng để tính lại số) ---",
@@ -304,6 +309,7 @@ export default function AdminPage() {
           emailError: json.emailError ?? null,
           parentEmailSent: json.parentEmailSent ?? null,
           parentEmailError: json.parentEmailError ?? null,
+          vakad_report_file_url: json.vakad_report_file_url ?? null,
         },
       }));
     } catch (err) {
@@ -620,7 +626,11 @@ export default function AdminPage() {
                                         }}
                                       >
                                         {(() => {
-                                          const reportLabel = l.quiz_leads?.has_vakad
+                                          // Dùng đúng kết quả file thật đã dựng được (trả về từ API sau khi
+                                          // chạy xong) thay vì cờ has_vakad tĩnh — has_vakad=true không đảm
+                                          // bảo báo cáo thứ 3 luôn dựng thành công (VD thiếu free_report ở
+                                          // dữ liệu cũ), nên label phải khớp với thực tế đã gửi cho khách.
+                                          const reportLabel = result.vakad_report_file_url
                                             ? "3 báo cáo PDF (Xu hướng Học tập + Career Map + Chiến lược xét tuyển)"
                                             : "2 báo cáo PDF (Career Map + Chiến lược xét tuyển)";
                                           const mainLine = result.emailSent
@@ -813,6 +823,7 @@ export default function AdminPage() {
                 <th style={{ ...S.th, borderLeft: "2px solid #d1d1d6" }}>Ngày sinh</th>
                 <th style={S.th}>Khối học</th>
                 <th style={S.th}>Học lực</th>
+                <th style={S.th}>Nơi ở</th>
                 <th style={{ ...S.th, borderLeft: "2px solid #d1d1d6" }}>VAKAD</th>
                 <th style={S.th}>Đường Đời</th>
                 <th style={S.th}>Sứ Mệnh</th>
@@ -833,6 +844,7 @@ export default function AdminPage() {
                     <td style={{ ...S.td, borderLeft: "2px solid #d1d1d6" }}>{l.dob}</td>
                     <td style={S.td}>{l.khoi_hoc}</td>
                     <td style={S.td}>{l.hoc_luc}</td>
+                    <td style={S.td}>{l.noi_o ?? "—"}</td>
                     <td style={{ ...S.td, borderLeft: "2px solid #d1d1d6" }}>{l.vakad_dominant ?? "Chưa làm bài test"}</td>
                     <td style={S.td}>{l.duong_doi}</td>
                     <td style={S.td}>{l.su_menh ?? "—"}</td>

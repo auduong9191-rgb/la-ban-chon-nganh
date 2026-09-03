@@ -10,11 +10,16 @@ export function generateVietQRUrl(opts: {
   content: string;
   template?: "compact" | "qronly" | "";
 }): string {
+  // VietinBank chỉ đẩy thông báo biến động số dư sang Sepay nếu nội dung
+  // chuyển khoản bắt đầu bằng "SEVQR" (yêu cầu riêng của VietinBank, xem
+  // cảnh báo trên dashboard Sepay > Ngân hàng > VietinBank).
+  const content =
+    opts.bank === "VietinBank" ? `SEVQR ${opts.content}` : opts.content;
   const params = new URLSearchParams({
     acc: opts.accountNumber,
     bank: opts.bank,
     amount: String(Math.floor(opts.amount)),
-    des: opts.content,
+    des: content,
   });
   if (opts.template) params.set("template", opts.template);
   return `https://qr.sepay.vn/img?${params.toString()}`;

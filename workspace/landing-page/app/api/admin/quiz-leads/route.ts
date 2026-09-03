@@ -17,6 +17,7 @@ type QuizLead = {
   dob: string;
   khoi_hoc: string;
   hoc_luc: string;
+  noi_o: string | null;
   email: string | null;
   phone: string | null;
   vakad_dominant: string | null;
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest) {
     const { data, error } = await supabaseAdmin
       .from("quiz_leads")
       .select(
-        "id, ten_phu_huynh, ho_ten, dob, khoi_hoc, hoc_luc, email, phone, vakad_dominant, duong_doi, ngay_sinh, su_menh, linh_hon, free_report, has_vakad, created_at"
+        "id, ten_phu_huynh, ho_ten, dob, khoi_hoc, hoc_luc, noi_o, email, phone, vakad_dominant, duong_doi, ngay_sinh, su_menh, linh_hon, free_report, has_vakad, created_at"
       )
       .order("created_at", { ascending: false });
 

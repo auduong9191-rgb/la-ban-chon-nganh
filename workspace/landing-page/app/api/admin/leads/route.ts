@@ -14,6 +14,7 @@ type QuizJoin = {
   dob: string;
   khoi_hoc: string;
   hoc_luc: string;
+  noi_o: string | null;
   // null = luồng phụ huynh (bỏ qua bài test VAKAD, đi thẳng thanh toán)
   vakad_dominant: string | null;
   duong_doi: number;
@@ -87,7 +88,7 @@ export async function GET(req: NextRequest) {
          career_map_text, career_map_file_path, career_map_file_name, career_map_updated_at,
          strategy_text, strategy_file_path, strategy_file_name, strategy_updated_at,
          vakad_report_file_path, vakad_report_file_name, vakad_report_updated_at,
-         quiz_leads(ho_ten, dob, khoi_hoc, hoc_luc, vakad_dominant, duong_doi, ngay_sinh, su_menh, linh_hon, ten_phu_huynh, free_report, has_vakad, parent_email)`
+         quiz_leads(ho_ten, dob, khoi_hoc, hoc_luc, noi_o, vakad_dominant, duong_doi, ngay_sinh, su_menh, linh_hon, ten_phu_huynh, free_report, has_vakad, parent_email)`
       )
       .order("created_at", { ascending: false });
 

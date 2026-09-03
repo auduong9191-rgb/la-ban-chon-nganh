@@ -39,7 +39,7 @@ export const offer = {
         tag: "Cá nhân hóa",
         name: "Chiến Lược Đỗ Đại Học Mơ Ước",
         description:
-          "Bảng xếp hạng phương thức xét tuyển (IELTS + học bạ, HSA/ĐGNL, điểm thi tốt nghiệp) ưu tiên đúng theo năng lực thật của con.",
+          "Bảng xếp hạng phương thức xét tuyển (IELTS + học bạ, HSA/ĐGNL, điểm thi tốt nghiệp) ưu tiên đúng theo năng lực thật của con, kèm gợi ý trường theo 3 phương án được tính toán sát với cả năng lực lẫn nơi con đang sinh sống — tránh đề xuất trường quá xa gây tốn kém chi phí ở trọ không cần thiết.",
       },
     ],
   },
@@ -68,7 +68,7 @@ export const offer = {
       {
         title: "Nhận Chiến lược đỗ đại học mơ ước riêng",
         description:
-          "Bảng xếp hạng phương thức xét tuyển (IELTS + học bạ, HSA/ĐGNL, điểm thi tốt nghiệp) ưu tiên theo đúng năng lực thật của con.",
+          "Bảng xếp hạng phương thức xét tuyển (IELTS + học bạ, HSA/ĐGNL, điểm thi tốt nghiệp) ưu tiên theo đúng năng lực thật của con, cùng gợi ý trường phù hợp cả năng lực lẫn vị trí địa lý nơi con sinh sống.",
       },
     ],
   },
@@ -88,6 +88,11 @@ export const offer = {
       title: "Có chiến lược xét tuyển cụ thể, xếp hạng ưu tiên",
       description:
         "Biết phương thức nào nên ưu tiên (IELTS + học bạ, HSA/ĐGNL, hay điểm thi tốt nghiệp), thay vì đặt cược tất cả vào một lựa chọn duy nhất.",
+    },
+    {
+      title: "Gợi ý trường sát với vị trí thực tế của gia đình",
+      description:
+        "3 phương án chọn trường (Bứt phá - Vừa sức - An toàn) được cân đối theo cả năng lực lẫn nơi con đang sinh sống — không đề xuất trường quá xa nếu không thật sự cần thiết, giúp ba mẹ chủ động cả về tài chính lẫn tâm lý.",
     },
   ],
 
@@ -229,7 +234,7 @@ export const offer = {
     },
     {
       id: "chien-luoc",
-      name: "Chiến lược đỗ đại học mơ ước — \"Kỷ luật trong Tự do\" + xếp hạng phương thức xét tuyển",
+      name: "Chiến lược đỗ đại học mơ ước — \"Kỷ luật trong Tự do\" + xếp hạng phương thức xét tuyển + gợi ý trường theo năng lực & nơi ở",
     },
   ],
 
@@ -243,7 +248,7 @@ export const offer = {
         isRecommended: true,
         includes: [
           "Career Map cá nhân hóa: Lợi thế cạnh tranh LADAME + Ma trận ngành học Holland A-S-E",
-          "Chiến lược đỗ đại học mơ ước: Bộ giải pháp \"Kỷ luật trong Tự do\" + xếp hạng phương thức xét tuyển",
+          "Chiến lược đỗ đại học mơ ước: Bộ giải pháp \"Kỷ luật trong Tự do\" + xếp hạng phương thức xét tuyển + gợi ý trường theo năng lực & nơi ở",
           "+ Quà tặng thêm: Tài liệu hỗ trợ học tập gửi qua Zalo",
         ],
         recommendedFor:
@@ -266,7 +271,7 @@ export const offer = {
     {
       question: "Con cần cung cấp thông tin gì để làm báo cáo?",
       answer:
-        "Họ tên và ngày sinh của con (để tính thần số học), khối thi và học lực hiện tại, cùng câu trả lời cho 10 câu trắc nghiệm VAKAD. Tất cả chỉ mất khoảng 4-5 phút.",
+        "Họ tên và ngày sinh của con (để tính thần số học), khối thi và học lực hiện tại, tỉnh/thành phố nơi con đang sinh sống (để gợi ý trường sát thực tế hơn), cùng câu trả lời cho 10 câu trắc nghiệm VAKAD. Tất cả chỉ mất khoảng 4-5 phút.",
     },
     {
       question: "Phương pháp phân tích dựa trên cơ sở nào?",
