@@ -1,5 +1,5 @@
 // GET /api/admin/ctv — danh sách CTV (cả active lẫn inactive, giữ đúng lịch sử báo cáo)
-// POST /api/admin/ctv — tạo CTV mới, tự sinh mã CTV ẩn danh dạng tiara{nhóm}{số thứ tự}
+// POST /api/admin/ctv — tạo CTV mới, tự sinh mã CTV ẩn danh dạng tia{nhóm}{số thứ tự}
 // (không dùng tên thật, không để admin gõ tay — xem lib/ctv.ts)
 //
 // Headers: x-admin-pass: <password>

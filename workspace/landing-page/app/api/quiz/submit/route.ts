@@ -10,7 +10,7 @@ import {
   type VakadScoreBreakdown,
 } from "@/lib/vakad-questions";
 import { generateFreeVakadReport } from "@/lib/gemini";
-import { notifyCtvFreeReport } from "@/lib/ctv";
+import { notifyCtvFreeReport, reconcileCtvCode } from "@/lib/ctv";
 
 const DOB_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const PHONE_REGEX = /^0\d{9,10}$/;
@@ -116,6 +116,12 @@ export async function POST(request: NextRequest) {
 
   const hoTenUpper = toUppercaseName(hoTen);
 
+  // Chuẩn hoá + tự sửa mã CTV về đúng mã thật trong bảng `ctv` trước khi lưu —
+  // link CTV được chia sẻ tay qua Zalo/Messenger nên rất dễ bị gõ nhầm
+  // ("tiiaa101") hoặc dính chữ thừa ("tiara101đây"); không sửa ở đây thì 1 CTV
+  // sẽ bị tách thành nhiều mã khác nhau trong báo cáo hiệu suất/hoa hồng.
+  const resolvedCtvCode = ctvCode?.trim() ? await reconcileCtvCode(ctvCode) : null;
+
   // Thần số học (Đường Đời/Sứ Mệnh/Linh Hồn/Ngày Sinh) chỉ cần họ tên + ngày
   // sinh — tính được cho CẢ 2 luồng, không phụ thuộc bài test VAKAD.
   const { duongDoi, ngaySinh, suMenh, linhHon } = calculateCoreNumerology(
@@ -177,7 +183,7 @@ export async function POST(request: NextRequest) {
       linh_hon: linhHon,
       free_report: freeReport,
       has_vakad: hasVakad,
-      ctv_code: ctvCode?.trim() || null,
+      ctv_code: resolvedCtvCode,
     })
     .select("id")
     .single();
@@ -193,10 +199,10 @@ export async function POST(request: NextRequest) {
   // Trigger 1 — báo CTV ngay khi có báo cáo free thật (chỉ áp dụng luồng học
   // sinh đã làm VAKAD) — không được để lỗi gửi mail làm hỏng response trả về
   // cho học sinh đang chờ kết quả.
-  if (ctvCode?.trim() && freeReport) {
+  if (resolvedCtvCode && freeReport) {
     const [ctvNotifyResult] = await Promise.allSettled([
       notifyCtvFreeReport({
-        ctvCode,
+        ctvCode: resolvedCtvCode,
         hoTen: hoTenUpper,
         khoiHoc,
         hocLuc,
