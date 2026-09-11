@@ -80,6 +80,9 @@ export async function POST(
     .select(
       `id, name, email, phone, ctv_code,
        quiz_leads(ho_ten, dob, khoi_hoc, hoc_luc, vakad_dominant, duong_doi, ngay_sinh, su_menh, linh_hon, free_report, has_vakad, parent_email, noi_o)`
+      // khoi_hoc: nhóm khối + chi tiết tổ hợp học sinh tự điền ở landing page —
+      // BẮT BUỘC đưa vào prompt Chiến lược 360° (Gem 3) để ngành/trường gợi ý
+      // đúng khối, tránh lặp lại lỗi "khối thi chưa khớp" trước đây.
     )
     .eq("id", id)
     .maybeSingle();
@@ -180,6 +183,7 @@ export async function POST(
       linhHon: quiz.linh_hon,
       ngaySinh: quiz.ngay_sinh,
       noiO: quiz.noi_o ?? null,
+      khoiThi: quiz.khoi_hoc ?? null,
       careerMapInsights,
     });
   } catch (err) {

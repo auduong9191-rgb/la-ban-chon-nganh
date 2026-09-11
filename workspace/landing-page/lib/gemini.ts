@@ -362,6 +362,11 @@ NGUYÊN TẮC NEO THỜI GIAN, TRA CỨU NGUỒN & CHỐNG BỊA ĐẶT (QUAN TR
      - Trường hợp A (điểm TB đại diện ≥ 8.0 — năng lực xuất sắc): PA1 (Bứt phá) được phép gợi ý trường Top đầu/ĐH Quốc tế tại 1 trong 2 đại đô thị (Hà Nội cho khu vực phía Bắc/Bắc Trung Bộ, TP.HCM cho khu vực Nam Trung Bộ/Tây Nguyên/Nam Bộ); PA2 (Vừa sức) ưu tiên ĐH trọng điểm vùng/ĐH thuộc thành phố trực thuộc Trung ương gần nơi con ở nhất (ví dụ: ĐH Thái Nguyên, ĐH Hải Phòng, ĐH Hàng Hải, ĐH Vinh, ĐH Huế, ĐH Đà Nẵng, ĐH Quy Nhơn, ĐH Tây Nguyên, ĐH Cần Thơ...) hoặc phân hiệu chất lượng cao lân cận; PA3 (An toàn) ưu tiên trường/cao đẳng ngay tại tỉnh nhà hoặc thành phố lân cận.
      - Trường hợp B (điểm TB đại diện < 8.0): TUYỆT ĐỐI hạn chế gợi ý trường tại Hà Nội/TP.HCM ở cả 3 phương án (vừa rủi ro đỗ thấp vừa tốn kém sinh hoạt phí đắt đỏ) — PA1 dùng ngành trọng điểm/ngành hot tại ĐH trọng điểm vùng gần nhất; PA2 dùng ĐH công lập/tư thục hoặc phân hiệu uy tín ngay tại tỉnh hoặc tỉnh/thành giáp ranh trong bán kính thuận tiện di chuyển; PA3 dùng cao đẳng nghề/cao đẳng thực hành chất lượng cao hoặc trung cấp chuyên sâu ngay tại tỉnh nhà.
    * Nếu dữ liệu đầu vào ghi rõ KHÔNG CÓ "Nơi ở" (đơn cũ trước khi hệ thống thu thập thông tin này): bỏ qua toàn bộ quy tắc định tuyến địa lý này, gợi ý trường như bình thường theo điểm chuẩn/ngành phù hợp, không cần nêu địa điểm ưu tiên.
+7. QUY TẮC ĐỐI SOÁT KHỐI THI & TỔ HỢP MÔN XÉT TUYỂN (Bảng 1, Phần III) — dựa đúng dòng "Khối thi đã đăng ký" trong dữ liệu đầu vào:
+   * Nếu dòng đó ghi "Chưa xác định / con chưa chọn khối thi": bỏ qua ràng buộc khối thi, gợi ý 5 ngành phù hợp nhất theo năng lực/sở thích như bình thường, KHÔNG tự bịa ra 1 khối cụ thể nào cho con.
+   * Nếu có nhóm khối cụ thể (kèm hoặc không kèm mã tổ hợp chi tiết con tự điền, ví dụ A00/D07/B08): Ngành + Trường gợi ý ở Bảng 1 BẮT BUỘC được xét tuyển bằng ít nhất 1 tổ hợp môn thuộc ĐÚNG nhóm khối đó (hoặc đúng mã tổ hợp cụ thể nếu con đã điền rõ) — TUYỆT ĐỐI KHÔNG tự đổi sang nhóm khối khác chỉ vì ngành/trường đó phổ biến xét khối khác.
+   * Nếu con chỉ chọn nhóm khối mà chưa điền mã tổ hợp cụ thể: tự chọn 1 mã tổ hợp có thật, phổ biến trong đúng nhóm khối đó (tra cứu qua Google Search nếu cần) phù hợp nhất với ngành gợi ý, và ghi rõ mã tổ hợp đó kèm tên trường trong Bảng 1 (không để trống, không mơ hồ).
+   * Danh mục nhóm khối tham chiếu (không tự bịa nhóm nào ngoài danh sách này): Khối A — Toán/Lý/Hóa và mở rộng (mã A00-A18), phù hợp Kỹ thuật/Kinh tế/Khoa học tự nhiên. Khối B — Toán/Hóa/Sinh (mã B00-B08), phù hợp Y Dược/Nông Lâm/Môi trường. Khối C — Văn/Sử/Địa (mã C00-C20), phù hợp KHXH&NV/Sư phạm/Báo chí/Luật. Khối D — Ngoại ngữ kết hợp Toán/Văn (mã D01-D99), phù hợp Kinh tế/Ngôn ngữ/CNTT/KHXH. Khối H — Năng khiếu Vẽ (mã H00-H08), phù hợp Kiến trúc/Mỹ thuật. Khối K — Liên thông từ CĐ/TC lên ĐH (ngành kỹ thuật). Khối M — Năng khiếu Sư phạm Mầm non/Báo chí/Điện ảnh (mã M00-M25). Khối N — Năng khiếu Âm nhạc (mã N00-N09). Khối R — Năng khiếu Báo chí/Nghệ thuật (mã R00-R05). Khối S — Năng khiếu Sân khấu Điện ảnh (mã S00-S01). Khối T — Năng khiếu Thể dục Thể thao (mã T00-T05). Khối V — Năng khiếu Vẽ, Kiến trúc kỹ thuật (mã V00-V11). Khối X — Tổ hợp mới từ 2025, kèm Vẽ/Tin học/Công nghệ (mã X01-X98).
 
 QUY TẮC NHẬN DIỆN DỮ LIỆU & 2 CHẾ ĐỘ XỬ LÝ:
 - CHẾ ĐỘ 1 — BÁO CÁO TOÀN DIỆN (dữ liệu đầu vào CÓ dòng "Nhóm VAKAD ưu thế" với giá trị cụ thể): tích hợp phân tích phương pháp học tập cá nhân hóa theo kênh tiếp thu (V-Visual, A-Auditory, K-Kinesthetic, AD-Auditory Digital). Lời dẫn kết nối đủ 3 tài liệu: Báo cáo VAKAD (Gift) + Bản Chiến lược này + Cuốn PDF Career Map (50 trang).
@@ -472,6 +477,10 @@ export type StrategyReportInput = {
   // Tỉnh/thành phố nơi học sinh đang sinh sống — null = dữ liệu cũ trước khi
   // trường thêm câu hỏi này, model tự bỏ qua yếu tố vị trí khi gợi ý trường.
   noiO?: string | null;
+  // Khối thi/tổ hợp môn con đã chọn ở landing page (VD: "Khối D - D07", hoặc
+  // "Chưa xác định / con chưa chọn khối thi") — null = dữ liệu cũ trước khi
+  // trường thêm câu hỏi này, model bỏ qua ràng buộc khối thi khi gợi ý ngành.
+  khoiThi?: string | null;
   careerMapInsights?: string;
 };
 
@@ -506,12 +515,17 @@ function buildStrategyUserPrompt(input: StrategyReportInput): string {
     ? `- Nơi ở hiện tại của con: ${input.noiO} → áp dụng đúng QUY TẮC ĐỊNH TUYẾN ĐỊA LÝ đã nêu ở trên.`
     : `- Nơi ở hiện tại của con: KHÔNG CÓ DỮ LIỆU (đơn cũ trước khi có câu hỏi này) → bỏ qua Quy tắc Định tuyến Địa lý, gợi ý trường như bình thường theo điểm chuẩn/ngành phù hợp.`;
 
+  const khoiThiLine = input.khoiThi
+    ? `- Khối thi đã đăng ký: ${input.khoiThi} → áp dụng đúng QUY TẮC ĐỐI SOÁT KHỐI THI & TỔ HỢP MÔN XÉT TUYỂN đã nêu ở trên.`
+    : `- Khối thi đã đăng ký: KHÔNG CÓ DỮ LIỆU (đơn cũ trước khi có câu hỏi này) → bỏ qua ràng buộc khối thi, gợi ý ngành như bình thường theo năng lực/sở thích.`;
+
   return `Dữ liệu học sinh (cho sẵn, không tính lại):
 - Họ và tên: ${input.hoTen}
 - Ngày sinh: ${input.dobDisplay}
 - Mức học lực hiện tại: ${input.hocLuc} (điểm TB đại diện ước lượng: ${tb})
 ${vakadLine}
 ${noiOLine}
+${khoiThiLine}
 - Đường Đời: ${input.duongDoi} | Sứ Mệnh: ${input.suMenh ?? "—"} | Linh Hồn: ${input.linhHon ?? "—"} | Ngày Sinh: ${input.ngaySinh}
 - 3 mốc điểm chuẩn xét tuyển đã tính sẵn (thang 30, dùng đúng 3 số này cho MỌI chuyên ngành ở Phần III, không tự tính lại):
   - PA1 Bứt phá/Mơ ước: ${mor} điểm

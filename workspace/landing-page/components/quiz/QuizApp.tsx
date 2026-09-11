@@ -15,15 +15,39 @@ type Step =
   | "submitting"
   | "error";
 
-const KHOI_HOC_OPTIONS = [
-  "A00 (Toán - Lý - Hóa)",
-  "A01 (Toán - Lý - Anh)",
-  "B00 (Toán - Hóa - Sinh)",
-  "C00 (Văn - Sử - Địa)",
-  "D01 (Toán - Văn - Anh)",
-  "D07 (Toán - Hóa - Anh)",
-  "Khác / Chưa xác định",
+// Nhóm khối thi theo chữ cái đầu — chỉ liệt kê nhóm lớn (A-X) để chọn nhanh,
+// KHÔNG liệt kê hết ~150+ mã tổ hợp con (A00, D07, X25...) vì quá nhiều số dễ
+// rối; mã tổ hợp cụ thể học sinh tự điền ở ô chi tiết bên dưới (đối soát với
+// kho dữ liệu khối thi/ngành/trường của Gem 3 ở bước tạo báo cáo).
+const NHOM_KHOI_OPTIONS: { value: string; hint: string }[] = [
+  { value: "A", hint: "Toán, Lý, Hóa và các tổ hợp mở rộng" },
+  { value: "B", hint: "Toán, Hóa, Sinh và các tổ hợp mở rộng" },
+  { value: "C", hint: "Văn, Sử, Địa và các tổ hợp mở rộng" },
+  { value: "D", hint: "Ngoại ngữ kết hợp Toán/Văn và các tổ hợp mở rộng" },
+  { value: "H", hint: "Năng khiếu Vẽ — Kiến trúc, Mỹ thuật" },
+  { value: "K", hint: "Liên thông (đã tốt nghiệp CĐ/TC)" },
+  { value: "M", hint: "Sư phạm Mầm non, Báo chí, Điện ảnh Truyền hình" },
+  { value: "N", hint: "Năng khiếu Âm nhạc" },
+  { value: "R", hint: "Báo chí, Nghệ thuật (năng khiếu)" },
+  { value: "S", hint: "Sân khấu Điện ảnh (năng khiếu)" },
+  { value: "T", hint: "Năng khiếu Thể dục Thể thao" },
+  { value: "V", hint: "Năng khiếu Vẽ — Kiến trúc kỹ thuật" },
+  { value: "X", hint: "Tổ hợp mới từ 2025 (kèm Vẽ/Tin học/Công nghệ)" },
 ];
+const NHOM_KHOI_CHUA_XAC_DINH = "CHUA_XAC_DINH";
+
+// Gộp nhóm khối + chi tiết tổ hợp (nếu có) thành 1 chuỗi lưu vào cột
+// `khoi_hoc` hiện có — không cần đổi schema DB / các nơi đang đọc field này
+// (mailer, CTV notify, admin, Gem 3 prompt).
+function buildKhoiHocValue(nhomKhoi: string, chiTietKhoi: string): string {
+  if (nhomKhoi === NHOM_KHOI_CHUA_XAC_DINH) {
+    return "Chưa xác định / con chưa chọn khối thi";
+  }
+  const detail = chiTietKhoi.trim();
+  return detail
+    ? `Khối ${nhomKhoi} - ${detail}`
+    : `Khối ${nhomKhoi} (chưa rõ tổ hợp cụ thể)`;
+}
 
 const HOC_LUC_OPTIONS = [
   "Giỏi (điểm TB các môn từ 8.0 trở lên)",
@@ -52,7 +76,8 @@ export function QuizApp() {
 
   const [tenPhuHuynh, setTenPhuHuynh] = useState("");
   const [dob, setDob] = useState("");
-  const [khoiHoc, setKhoiHoc] = useState("");
+  const [nhomKhoi, setNhomKhoi] = useState("");
+  const [chiTietKhoi, setChiTietKhoi] = useState("");
   const [hocLuc, setHocLuc] = useState("");
   // Tỉnh/thành phố nơi con đang sinh sống — dùng để báo cáo Chiến lược 360°
   // (Phần III) gợi ý trường sát với vị trí thực tế thay vì chỉ dựa điểm chuẩn.
@@ -108,8 +133,8 @@ export function QuizApp() {
       setForm2Error("Vui lòng chọn ngày sinh.");
       return;
     }
-    if (!khoiHoc) {
-      setForm2Error("Vui lòng chọn khối học.");
+    if (!nhomKhoi) {
+      setForm2Error("Vui lòng chọn khối thi (hoặc chọn mục dành cho học sinh chưa xác định khối).");
       return;
     }
     if (!hocLuc) {
@@ -146,8 +171,8 @@ export function QuizApp() {
       setForm2Error("Ba mẹ vui lòng chọn ngày sinh của học sinh.");
       return;
     }
-    if (!khoiHoc) {
-      setForm2Error("Ba mẹ vui lòng chọn khối học của con.");
+    if (!nhomKhoi) {
+      setForm2Error("Ba mẹ vui lòng chọn khối thi của con (hoặc chọn mục 'chưa xác định' nếu con chưa chọn khối).");
       return;
     }
     if (!hocLuc) {
@@ -188,7 +213,7 @@ export function QuizApp() {
           hoTen: hoTen.trim(),
           tenPhuHuynh: tenPhuHuynh.trim(),
           dob,
-          khoiHoc,
+          khoiHoc: buildKhoiHocValue(nhomKhoi, chiTietKhoi),
           hocLuc,
           noiO: noiO.trim(),
           email: email.trim(),
@@ -236,7 +261,7 @@ export function QuizApp() {
           hoTen: hoTen.trim(),
           tenPhuHuynh: tenPhuHuynh.trim(),
           dob,
-          khoiHoc,
+          khoiHoc: buildKhoiHocValue(nhomKhoi, chiTietKhoi),
           hocLuc,
           noiO: noiO.trim(),
           email: email.trim(),
@@ -466,21 +491,40 @@ export function QuizApp() {
 
           <div>
             <label className="block text-sm font-medium text-ink mb-1">
-              Khối học / Tổ hợp xét tuyển của con
+              Khối thi của con
             </label>
             <select
               required
-              value={khoiHoc}
-              onChange={(e) => setKhoiHoc(e.target.value)}
+              value={nhomKhoi}
+              onChange={(e) => setNhomKhoi(e.target.value)}
               className="w-full rounded-lg border border-border-soft px-4 py-3 text-base text-ink bg-white focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="">-- Chọn khối học --</option>
-              {KHOI_HOC_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
+              <option value="">-- Chọn khối thi --</option>
+              {NHOM_KHOI_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  Khối {opt.value} ({opt.hint})
                 </option>
               ))}
+              <option value={NHOM_KHOI_CHUA_XAC_DINH}>
+                Con chưa chọn khối / chưa xác định
+              </option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-ink mb-1">
+              Chi tiết tổ hợp môn (nếu con đã biết mã cụ thể)
+            </label>
+            <input
+              type="text"
+              value={chiTietKhoi}
+              onChange={(e) => setChiTietKhoi(e.target.value)}
+              placeholder="VD: A00, D07, B08... (không bắt buộc)"
+              className="w-full rounded-lg border border-border-soft px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <p className="text-xs text-ink-soft mt-1">
+              Điền càng chi tiết, báo cáo gợi ý ngành/trường càng chính xác. Bỏ trống nếu con chưa biết mã tổ hợp cụ thể.
+            </p>
           </div>
 
           <div>
@@ -646,21 +690,40 @@ export function QuizApp() {
 
           <div>
             <label className="block text-sm font-medium text-ink mb-1">
-              Khối học / Tổ hợp xét tuyển
+              Khối thi
             </label>
             <select
               required
-              value={khoiHoc}
-              onChange={(e) => setKhoiHoc(e.target.value)}
+              value={nhomKhoi}
+              onChange={(e) => setNhomKhoi(e.target.value)}
               className="w-full rounded-lg border border-border-soft px-4 py-3 text-base text-ink bg-white focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="">-- Chọn khối học --</option>
-              {KHOI_HOC_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
+              <option value="">-- Chọn khối thi --</option>
+              {NHOM_KHOI_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  Khối {opt.value} ({opt.hint})
                 </option>
               ))}
+              <option value={NHOM_KHOI_CHUA_XAC_DINH}>
+                Con chưa chọn khối / chưa xác định
+              </option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-ink mb-1">
+              Chi tiết tổ hợp môn (nếu đã biết mã cụ thể)
+            </label>
+            <input
+              type="text"
+              value={chiTietKhoi}
+              onChange={(e) => setChiTietKhoi(e.target.value)}
+              placeholder="VD: A00, D07, B08... (không bắt buộc)"
+              className="w-full rounded-lg border border-border-soft px-4 py-3 text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <p className="text-xs text-ink-soft mt-1">
+              Điền càng chi tiết, báo cáo gợi ý ngành/trường càng chính xác. Bỏ trống nếu chưa biết mã tổ hợp cụ thể.
+            </p>
           </div>
 
           <div>
