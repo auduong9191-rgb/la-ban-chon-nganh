@@ -3,7 +3,8 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, Fragment, FormEvent } from "react";
+import { useState, useEffect, useCallback, useRef, Fragment, FormEvent } from "react";
+import type { RefObject } from "react";
 import { CtvManagement } from "@/components/admin/CtvManagement";
 import { CtvPerformanceReport } from "@/components/admin/CtvPerformanceReport";
 
@@ -98,6 +99,7 @@ export default function AdminPage() {
   const [data, setData] = useState<LeadResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const leadsTableWrapRef = useRef<HTMLDivElement>(null);
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<"all" | "paid" | "pending" | "refunded">("all");
@@ -108,6 +110,7 @@ export default function AdminPage() {
   const [quizData, setQuizData] = useState<QuizLeadResponse | null>(null);
   const [quizLoading, setQuizLoading] = useState(false);
   const [quizSearch, setQuizSearch] = useState("");
+  const quizTableWrapRef = useRef<HTMLDivElement>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -454,7 +457,9 @@ export default function AdminPage() {
 
       {error && <div style={S.errorBanner}>{error}</div>}
 
-      <div style={S.tableWrap}>
+      <TopScrollbar targetRef={leadsTableWrapRef} deps={[data, loading]} />
+
+      <div style={S.tableWrap} ref={leadsTableWrapRef}>
         {loading ? (
           <div style={S.empty}>Đang tải...</div>
         ) : data && data.leads.length > 0 ? (
@@ -809,7 +814,9 @@ export default function AdminPage() {
         />
       </div>
 
-      <div style={S.tableWrap}>
+      <TopScrollbar targetRef={quizTableWrapRef} deps={[quizData, quizLoading]} />
+
+      <div style={S.tableWrap} ref={quizTableWrapRef}>
         {quizLoading ? (
           <div style={S.empty}>Đang tải...</div>
         ) : quizData && quizData.leads.length > 0 ? (
@@ -898,6 +905,69 @@ export default function AdminPage() {
 
       <h1 style={{ ...S.h1, marginTop: 32 }}>Hiệu suất CTV</h1>
       <CtvPerformanceReport adminPass={password} />
+    </div>
+  );
+}
+
+function TopScrollbar({
+  targetRef,
+  deps,
+}: {
+  targetRef: RefObject<HTMLDivElement | null>;
+  deps: unknown[];
+}) {
+  const topRef = useRef<HTMLDivElement>(null);
+  const [scrollWidth, setScrollWidth] = useState(0);
+  const syncingFrom = useRef<"top" | "target" | null>(null);
+
+  useEffect(() => {
+    const update = () => {
+      if (targetRef.current) setScrollWidth(targetRef.current.scrollWidth);
+    };
+    update();
+    const raf = requestAnimationFrame(update);
+    window.addEventListener("resize", update);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", update);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+
+  useEffect(() => {
+    const target = targetRef.current;
+    if (!target) return;
+    const onTargetScroll = () => {
+      if (syncingFrom.current === "top") {
+        syncingFrom.current = null;
+        return;
+      }
+      if (topRef.current) {
+        syncingFrom.current = "target";
+        topRef.current.scrollLeft = target.scrollLeft;
+      }
+    };
+    target.addEventListener("scroll", onTargetScroll);
+    return () => target.removeEventListener("scroll", onTargetScroll);
+  }, [targetRef]);
+
+  const onTopScroll = () => {
+    if (syncingFrom.current === "target") {
+      syncingFrom.current = null;
+      return;
+    }
+    const target = targetRef.current;
+    if (target && topRef.current) {
+      syncingFrom.current = "top";
+      target.scrollLeft = topRef.current.scrollLeft;
+    }
+  };
+
+  if (scrollWidth <= 0) return null;
+
+  return (
+    <div ref={topRef} onScroll={onTopScroll} style={S.topScrollbar}>
+      <div style={{ width: scrollWidth, height: 1 }} />
     </div>
   );
 }
@@ -1023,6 +1093,13 @@ export const S: Record<string, React.CSSProperties> = {
   select: { padding: "8px 12px", fontSize: 13, border: "1px solid #d1d1d6", borderRadius: 6, background: "#fff", cursor: "pointer" },
   dateInput: { padding: "6px 10px", fontSize: 13, border: "1px solid #d1d1d6", borderRadius: 6 },
   dateSep: { color: "#666", fontSize: 13 },
+  topScrollbar: {
+    overflowX: "auto",
+    overflowY: "hidden",
+    maxWidth: 1400,
+    margin: "0 auto 8px",
+    height: 14,
+  },
   tableWrap: {
     background: "#fff",
     borderRadius: 10,
