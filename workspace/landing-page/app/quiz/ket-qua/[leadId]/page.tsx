@@ -48,7 +48,11 @@ export default async function QuizResultPage(
                 className="pointer-events-none select-none absolute left-1/2 top-1/2 w-[70%] max-w-none -translate-x-1/2 -translate-y-1/2 opacity-[0.04]"
               />
               <div className="relative z-10">
-                <ReportRenderer markdown={lead.free_report} leadId={lead.id} />
+                <ReportRenderer
+                  markdown={lead.free_report}
+                  leadId={lead.id}
+                  hasVakad={lead.has_vakad}
+                />
               </div>
             </div>
           </div>

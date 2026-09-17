@@ -13,7 +13,58 @@ const UNLOCK_CTA_MARKER = "[[UNLOCK_CTA]]";
 // hiệu ứng thị giác khơi gợi tò mò trước khi mua.
 const BLUR_LOCKED_MARKER = "[[BLUR_LOCKED_START]]";
 
-function UnlockCtaBox({ leadId }: { leadId: string }) {
+// Luồng phụ huynh (teaser, không VAKAD) — 5 lợi ích khi mở khoá, không nêu
+// tên báo cáo cụ thể (Career Map/Chiến lược 360°), chỉ mô tả nội dung nhận
+// được để bố mẹ hình dung rõ giá trị trước khi mua.
+const PARENT_UNLOCK_BENEFITS = [
+  "Xác định đúng 5 ngành học phù hợp nhất với năng lực, sở trường và khối thi của con — không còn chọn ngành theo cảm tính hay theo số đông.",
+  "Gợi ý trường theo 3 phương án Bứt phá – Vừa sức – An toàn, kèm điểm sàn/điểm chuẩn tham khảo sát đúng năng lực thật của con.",
+  "Xếp hạng phương thức xét tuyển ưu tiên (IELTS + học bạ, đánh giá năng lực, điểm thi tốt nghiệp...) để gia đình không đặt cược tất cả vào một kỳ thi duy nhất.",
+  "Học phí dự tính theo từng phương án, kèm cân đối chi phí sinh hoạt sát với nơi gia đình đang sinh sống — chủ động cả về tài chính.",
+  "Giải mã sâu năng khiếu bẩm sinh, động lực nội tại và những rào cản tâm lý con cần vượt qua, để có chiến lược phát triển bản thân rõ ràng thay vì chỉ dừng ở việc chọn ngành.",
+];
+
+function UnlockCtaBox({
+  leadId,
+  hasVakad,
+}: {
+  leadId: string;
+  hasVakad?: boolean;
+}) {
+  if (!hasVakad) {
+    return (
+      <div className="rounded-2xl bg-primary text-white p-6 sm:p-8 text-center my-6">
+        <p className="text-xs font-medium tracking-widest uppercase text-white/70 mb-2">
+          Ba mẹ vừa thấy một góc nhỏ của bức tranh
+        </p>
+        <h3 className="font-heading text-xl sm:text-2xl font-semibold mb-3">
+          Mở khoá trọn bộ Career Map + Chiến lược đỗ đại học mơ ước
+        </h3>
+        <p className="text-sm text-white/85 mb-4 leading-relaxed text-left sm:text-center">
+          Trên đây là những thông tin sơ bộ của con. Để có định hướng chi tiết
+          về 5 ngành học phù hợp nhất, gợi ý trường với đầy đủ điểm sàn,
+          phương thức xét tuyển và học phí dự tính, ba mẹ sẽ nhận được:
+        </p>
+        <ul className="text-sm text-white/85 mb-6 leading-relaxed text-left space-y-2 list-none">
+          {PARENT_UNLOCK_BENEFITS.map((benefit, i) => (
+            <li key={i} className="flex gap-2">
+              <span aria-hidden className="text-white/60 shrink-0">
+                ✓
+              </span>
+              <span>{benefit}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="text-sm text-white/85 mb-6 leading-relaxed">
+          Career Map cá nhân hóa (599.000đ) và Chiến lược đỗ đại học mơ ước —
+          định hướng ngành, phương thức xét tuyển phù hợp nhất (499.000đ) —
+          trọn bộ chỉ 299.000đ thay vì 1.098.000đ.
+        </p>
+        <UnlockButton leadId={leadId} />
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-2xl bg-primary text-white p-6 sm:p-8 text-center my-6">
       <p className="text-xs font-medium tracking-widest uppercase text-white/70 mb-2">
@@ -76,9 +127,11 @@ function renderList(
 export function ReportRenderer({
   markdown,
   leadId,
+  hasVakad,
 }: {
   markdown: string;
   leadId?: string;
+  hasVakad?: boolean;
 }) {
   const lines = markdown.split("\n");
   const blocks: ReactNode[] = [];
@@ -126,7 +179,9 @@ export function ReportRenderer({
     if (line === UNLOCK_CTA_MARKER) {
       flushList();
       if (leadId) {
-        blocks.push(<UnlockCtaBox key={key++} leadId={leadId} />);
+        blocks.push(
+          <UnlockCtaBox key={key++} leadId={leadId} hasVakad={hasVakad} />
+        );
         ctaRendered = true;
       }
     } else if (line === "---") {
@@ -209,7 +264,7 @@ export function ReportRenderer({
   // Báo cáo tạo trước khi có mục 5 (không chứa marker) — vẫn hiện nút mua ở
   // cuối để không mất CTA khi khách mở lại link kết quả cũ.
   if (!ctaRendered && leadId) {
-    blocks.push(<UnlockCtaBox key={key++} leadId={leadId} />);
+    blocks.push(<UnlockCtaBox key={key++} leadId={leadId} hasVakad={hasVakad} />);
   }
 
   return <div>{blocks}</div>;
