@@ -41,9 +41,8 @@ function UnlockCtaBox({
           Mở khoá trọn bộ Career Map + Chiến lược đỗ đại học mơ ước
         </h3>
         <p className="text-sm text-white/85 mb-4 leading-relaxed text-left sm:text-center">
-          Trên đây là những thông tin sơ bộ của con. Để có định hướng chi tiết
-          về 5 ngành học phù hợp nhất, gợi ý trường với đầy đủ điểm sàn,
-          phương thức xét tuyển và học phí dự tính, ba mẹ sẽ nhận được:
+          Trên đây là các thông tin sơ bộ của con, ba mẹ đăng ký trọn bộ để
+          nhận:
         </p>
         <ul className="text-sm text-white/85 mb-6 leading-relaxed text-left space-y-2 list-none">
           {PARENT_UNLOCK_BENEFITS.map((benefit, i) => (
