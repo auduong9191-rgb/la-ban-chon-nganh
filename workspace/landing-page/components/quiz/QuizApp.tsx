@@ -199,8 +199,10 @@ export function QuizApp() {
     submitParentFlow();
   }
 
-  // Luồng phụ huynh: bỏ qua bài test VAKAD — tạo kết quả (không có free
-  // report) rồi tạo đơn hàng ngay, đi thẳng tới trang thanh toán.
+  // Luồng phụ huynh: bỏ qua bài test VAKAD — API vẫn tạo 1 báo cáo teaser
+  // ngắn (dựa trên 4 chỉ số Thần số học) nên đi qua trang kết quả trước,
+  // giống hệt luồng học sinh — CTA mua trọn bộ nằm sẵn ở trang đó
+  // (UnlockButton tự gọi /api/quiz/checkout khi bấm).
   async function submitParentFlow() {
     setRetryAction("parent");
     setStep("submitting");
@@ -228,21 +230,7 @@ export function QuizApp() {
         setStep("error");
         return;
       }
-
-      const checkoutRes = await fetch("/api/quiz/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quizLeadId: submitData.leadId }),
-      });
-      const checkoutData = await checkoutRes.json();
-      if (!checkoutRes.ok) {
-        setSubmitError(
-          checkoutData.error ?? "Không thể tạo đơn hàng, vui lòng thử lại."
-        );
-        setStep("error");
-        return;
-      }
-      router.push(`/checkout/${checkoutData.orderId}`);
+      router.push(`/quiz/ket-qua/${submitData.leadId}`);
     } catch {
       setSubmitError("Không thể kết nối, vui lòng thử lại.");
       setStep("error");

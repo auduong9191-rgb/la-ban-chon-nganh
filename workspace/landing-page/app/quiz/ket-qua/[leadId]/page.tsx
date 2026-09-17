@@ -13,13 +13,17 @@ export default async function QuizResultPage(
 
   const { data: lead } = await supabaseAdmin
     .from("quiz_leads")
-    .select("id, ho_ten, free_report")
+    .select("id, ho_ten, free_report, has_vakad")
     .eq("id", leadId)
     .maybeSingle();
 
   if (!lead) {
     notFound();
   }
+
+  const heading = lead.has_vakad
+    ? `${lead.ho_ten}, đây là báo cáo phong cách học tập của con`
+    : `${lead.ho_ten}, đây là kết quả giải mã năng lực của con`;
 
   return (
     <>
@@ -30,7 +34,7 @@ export default async function QuizResultPage(
             Tiara Edu · Kết quả của con
           </p>
           <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-ink text-center mb-8">
-            {lead.ho_ten}, đây là báo cáo phong cách học tập của con
+            {heading}
           </h1>
 
           <div className="rounded-[28px] border border-border-soft bg-background p-1.5 shadow-sm mb-10">

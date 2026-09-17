@@ -7,6 +7,11 @@ import type { ReactNode } from "react";
 import { UnlockButton } from "./UnlockButton";
 
 const UNLOCK_CTA_MARKER = "[[UNLOCK_CTA]]";
+// Dùng cho báo cáo teaser (luồng phụ huynh, không VAKAD) — mọi block sau
+// marker này bị làm mờ bằng CSS cho tới hết báo cáo, tạo hiệu ứng "hé lộ rồi
+// khoá lại". Nội dung vẫn nằm trong DOM (không phải bảo mật thật), chỉ là
+// hiệu ứng thị giác khơi gợi tò mò trước khi mua.
+const BLUR_LOCKED_MARKER = "[[BLUR_LOCKED_START]]";
 
 function UnlockCtaBox({ leadId }: { leadId: string }) {
   return (
@@ -77,6 +82,12 @@ export function ReportRenderer({
 }) {
   const lines = markdown.split("\n");
   const blocks: ReactNode[] = [];
+  // Từ lúc gặp BLUR_LOCKED_MARKER, mọi block dựng ra được đổ vào đây thay vì
+  // `blocks` trực tiếp — cuối cùng cả cụm này được bọc trong 1 lớp blur CSS.
+  // CTA (UnlockCtaBox) KHÔNG bao giờ đi vào buffer này — luôn phải hiện rõ và
+  // bấm được.
+  const blurBuffer: ReactNode[] = [];
+  let activeBlocks: ReactNode[] = blocks;
   let listRoot: ListNode[] = [];
   let listStack: ListNode[][] = [listRoot];
   let listOrdered = false;
@@ -85,7 +96,7 @@ export function ReportRenderer({
 
   function flushList() {
     if (listRoot.length === 0) return;
-    blocks.push(renderList(listRoot, 0, `ul-${key++}`, listOrdered));
+    activeBlocks.push(renderList(listRoot, 0, `ul-${key++}`, listOrdered));
     listRoot = [];
     listStack = [listRoot];
     listOrdered = false;
@@ -107,6 +118,11 @@ export function ReportRenderer({
       flushList();
       continue;
     }
+    if (line === BLUR_LOCKED_MARKER) {
+      flushList();
+      activeBlocks = blurBuffer;
+      continue;
+    }
     if (line === UNLOCK_CTA_MARKER) {
       flushList();
       if (leadId) {
@@ -115,10 +131,10 @@ export function ReportRenderer({
       }
     } else if (line === "---") {
       flushList();
-      blocks.push(<hr key={key++} className="border-border-soft my-6" />);
+      activeBlocks.push(<hr key={key++} className="border-border-soft my-6" />);
     } else if (line.startsWith("> ")) {
       flushList();
-      blocks.push(
+      activeBlocks.push(
         <blockquote
           key={key++}
           className="border-l-4 border-accent pl-4 italic text-ink/80 my-4"
@@ -126,9 +142,19 @@ export function ReportRenderer({
           {renderInline(line.slice(2))}
         </blockquote>
       );
+    } else if (line.startsWith("### ")) {
+      flushList();
+      activeBlocks.push(
+        <h3
+          key={key++}
+          className="font-heading text-base sm:text-lg font-semibold text-ink mt-6 mb-2"
+        >
+          {line.slice(4)}
+        </h3>
+      );
     } else if (line.startsWith("## ")) {
       flushList();
-      blocks.push(
+      activeBlocks.push(
         <h2
           key={key++}
           className="font-heading text-lg sm:text-xl font-semibold uppercase tracking-wide text-primary-dark bg-gradient-to-r from-accent/20 via-accent/10 to-transparent border-l-4 border-accent rounded-r-xl px-4 py-2 mt-8 mb-3"
@@ -138,7 +164,7 @@ export function ReportRenderer({
       );
     } else if (line.startsWith("# ")) {
       flushList();
-      blocks.push(
+      activeBlocks.push(
         <h1
           key={key++}
           className="font-heading text-2xl sm:text-3xl font-semibold text-ink mb-4 pb-2 border-b-2 border-accent/40"
@@ -154,7 +180,7 @@ export function ReportRenderer({
       pushListItem(0, line.replace(/^\d+\.\s+/, ""));
     } else {
       flushList();
-      blocks.push(
+      activeBlocks.push(
         <p key={key++} className="text-ink leading-relaxed mb-3">
           {renderInline(line)}
         </p>
@@ -162,6 +188,23 @@ export function ReportRenderer({
     }
   }
   flushList();
+
+  // Báo cáo teaser (luồng phụ huynh) dừng ở BLUR_LOCKED_MARKER — mọi nội
+  // dung sau đó (đã gom vào blurBuffer) hiện mờ, kèm lớp phủ gradient để tạo
+  // cảm giác "còn tiếp, mua để xem hết" ngay phía trên nút CTA.
+  if (blurBuffer.length > 0) {
+    blocks.push(
+      <div key={key++} className="relative my-6 overflow-hidden rounded-2xl">
+        <div aria-hidden className="blur-[5px] select-none pointer-events-none opacity-90">
+          {blurBuffer}
+        </div>
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-b from-transparent via-surface/60 to-surface"
+        />
+      </div>
+    );
+  }
 
   // Báo cáo tạo trước khi có mục 5 (không chứa marker) — vẫn hiện nút mua ở
   // cuối để không mất CTA khi khách mở lại link kết quả cũ.

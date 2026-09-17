@@ -9,7 +9,7 @@ import {
   type VakadGroup,
   type VakadScoreBreakdown,
 } from "@/lib/vakad-questions";
-import { generateFreeVakadReport } from "@/lib/gemini";
+import { generateFreeVakadReport, generateParentTeaserReport } from "@/lib/gemini";
 import { notifyCtvFreeReport, reconcileCtvCode } from "@/lib/ctv";
 
 const DOB_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -152,6 +152,30 @@ export async function POST(request: NextRequest) {
       });
     } catch (err) {
       console.error("[/api/quiz/submit] gemini error:", err);
+      return NextResponse.json(
+        {
+          error:
+            "Không thể tạo báo cáo lúc này, vui lòng thử lại sau ít phút.",
+        },
+        { status: 502 }
+      );
+    }
+  } else {
+    // Luồng phụ huynh (bỏ qua VAKAD) — vẫn hé lộ 1 báo cáo teaser ngắn dựa
+    // trên 4 chỉ số Thần số học đã tính cứng ở trên, để trang kết quả không
+    // trống trơn trước khi dẫn tới CTA mua trọn bộ.
+    try {
+      freeReport = await generateParentTeaserReport({
+        hoTen: hoTenUpper,
+        dobDisplay: toDisplayDate(dob),
+        khoiThi: khoiHoc,
+        duongDoi,
+        ngaySinh,
+        linhHon,
+        suMenh,
+      });
+    } catch (err) {
+      console.error("[/api/quiz/submit] gemini parent teaser error:", err);
       return NextResponse.json(
         {
           error:
