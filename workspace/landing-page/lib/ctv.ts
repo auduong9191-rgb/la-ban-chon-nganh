@@ -1,6 +1,17 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase";
-import { sendFreeReportToCtv, sendPaidLeadToCtv, sendFullReportsToCtv } from "@/lib/mailer";
+import {
+  sendFreeReportToCtv,
+  sendPaidLeadToCtv,
+  sendFullReportsToCtv,
+  sendMainLinkPaidOrderEmail,
+} from "@/lib/mailer";
+
+// Mail nhận thông báo đơn thanh toán qua link chính (không qua CTV nào, hoặc
+// mã CTV không hợp lệ/không active) — chủ shop tự xử lý xuất Career Map cho
+// các đơn này. Trước đây các đơn kiểu này không ai nhận được mail vì
+// findActiveCtv trả về null làm notifyCtvPaidOrder no-op.
+const MAIN_LINK_NOTIFY_EMAIL = "aud9561@gmail.com";
 
 export type Ctv = {
   ctv_code: string;
@@ -171,7 +182,6 @@ export async function notifyCtvPaidOrder(params: {
   paidAt: string;
 }): Promise<void> {
   const ctv = await findActiveCtv(params.ctvCode);
-  if (!ctv) return;
 
   let quizFields = {
     hoTen: "—",
@@ -209,6 +219,24 @@ export async function notifyCtvPaidOrder(params: {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  if (!ctv) {
+    await sendMainLinkPaidOrderEmail({
+      to: MAIN_LINK_NOTIFY_EMAIL,
+      hoTen: quizFields.hoTen,
+      dob: quizFields.dob,
+      khoiHoc: quizFields.khoiHoc,
+      hocLuc: quizFields.hocLuc,
+      tenPhuHuynh: params.tenPhuHuynh,
+      phone: params.phone,
+      email: params.email,
+      productName: params.productName,
+      amount: params.amount,
+      paidAt: paidAtDisplay,
+      freeReport: quizFields.freeReport,
+    });
+    return;
+  }
 
   await sendPaidLeadToCtv({
     to: ctv.email,

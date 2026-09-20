@@ -233,6 +233,60 @@ Tiara Edu`;
   });
 }
 
+// Trigger 2b — fallback khi đơn thanh toán KHÔNG có CTV nào nhận (khách vào
+// từ link chính, không qua giới thiệu, hoặc mã CTV không hợp lệ/không active).
+// Không có CTV nào tự nhận trách nhiệm xuất Career Map cho các đơn này nên
+// phải gửi thẳng cho chủ shop, nếu không đơn sẽ "biến mất" — không ai biết mà
+// làm tiếp Career Map + Chiến lược cho khách.
+export async function sendMainLinkPaidOrderEmail(params: {
+  to: string;
+  hoTen: string;
+  dob: string;
+  khoiHoc: string;
+  hocLuc: string;
+  tenPhuHuynh: string;
+  phone: string;
+  email: string;
+  productName: string;
+  amount: number;
+  paidAt: string;
+  freeReport: string;
+}): Promise<void> {
+  const transport = getTransport();
+  const fromUser = process.env.GMAIL_USER;
+  const amountFormatted = params.amount.toLocaleString("vi-VN") + "đ";
+
+  const bodyText = `Có khách mới thanh toán qua LINK CHÍNH (không qua CTV nào giới thiệu) — cần xuất Career Map cho bạn này:
+
+--- Để xuất Career Map ---
+Họ tên học sinh: ${params.hoTen}
+Ngày sinh: ${params.dob}
+Khối học: ${params.khoiHoc}
+Học lực: ${params.hocLuc}
+
+--- Để tư vấn khách ---
+Tên phụ huynh: ${params.tenPhuHuynh}
+SĐT: ${params.phone}
+Email: ${params.email}
+Sản phẩm: ${params.productName}
+Số tiền: ${amountFormatted}
+Thời điểm thanh toán: ${params.paidAt}
+
+--- Báo cáo free (tham khảo) ---
+${params.freeReport}
+
+Trân trọng,
+Tiara Edu`;
+
+  await transport.sendMail({
+    from: `"Tiara Edu" <${fromUser}>`,
+    to: params.to,
+    subject: `[Tiara Edu] Khách mới (link chính) đã thanh toán — cần xuất Career Map cho ${params.hoTen}`,
+    text: bodyText,
+    html: `<pre style="white-space:pre-wrap;font-family:inherit;">${escapeHtml(bodyText)}</pre>`,
+  });
+}
+
 // Trigger 3 — gửi ngay khi trọn bộ báo cáo (Career Map + Chiến lược + Xu
 // hướng Học tập nếu có) vừa được gửi cho khách, cho CTV giới thiệu ở cả 2
 // nhóm — CTV cần có sẵn đúng bộ file khách đang cầm trong tay để chăm sóc/
