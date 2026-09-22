@@ -12,6 +12,7 @@ type PerformanceRow = {
   isActive: boolean;
   freeCount: number;
   paidCount: number;
+  tiara100Count: number;
   refundCount: number;
   revenue: number;
   commission: number;
@@ -58,11 +59,12 @@ export function CtvPerformanceReport({ adminPass }: { adminPass: string }) {
     (acc, r) => ({
       freeCount: acc.freeCount + r.freeCount,
       paidCount: acc.paidCount + r.paidCount,
+      tiara100Count: acc.tiara100Count + r.tiara100Count,
       refundCount: acc.refundCount + r.refundCount,
       revenue: acc.revenue + r.revenue,
       commission: acc.commission + r.commission,
     }),
-    { freeCount: 0, paidCount: 0, refundCount: 0, revenue: 0, commission: 0 }
+    { freeCount: 0, paidCount: 0, tiara100Count: 0, refundCount: 0, revenue: 0, commission: 0 }
   );
 
   return (
@@ -88,6 +90,7 @@ export function CtvPerformanceReport({ adminPass }: { adminPass: string }) {
                 <th style={S.th}>Nhóm</th>
                 <th style={{ ...S.th, textAlign: "right" }}>Số bản free</th>
                 <th style={{ ...S.th, textAlign: "right" }}>Số bản trả phí</th>
+                <th style={{ ...S.th, textAlign: "right" }}>Lượt dùng TIARA100</th>
                 <th style={{ ...S.th, textAlign: "right" }}>Hoàn tiền</th>
                 <th style={{ ...S.th, textAlign: "right" }}>Doanh số</th>
                 <th style={{ ...S.th, textAlign: "right" }}>Hoa hồng</th>
@@ -102,6 +105,7 @@ export function CtvPerformanceReport({ adminPass }: { adminPass: string }) {
                   <td style={S.td}>{GROUP_LABEL[r.groupType] ?? r.groupType}</td>
                   <td style={{ ...S.td, textAlign: "right" }}>{r.freeCount}</td>
                   <td style={{ ...S.td, textAlign: "right" }}>{r.paidCount}</td>
+                  <td style={{ ...S.td, textAlign: "right" }}>{r.tiara100Count}</td>
                   <td style={{ ...S.td, textAlign: "right" }}>{r.refundCount}</td>
                   <td style={{ ...S.td, textAlign: "right" }}>{formatVND(r.revenue)}</td>
                   <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{formatVND(r.commission)}</td>
@@ -112,6 +116,7 @@ export function CtvPerformanceReport({ adminPass }: { adminPass: string }) {
                 <td style={S.td}></td>
                 <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totals.freeCount}</td>
                 <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totals.paidCount}</td>
+                <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totals.tiara100Count}</td>
                 <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totals.refundCount}</td>
                 <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{formatVND(totals.revenue)}</td>
                 <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{formatVND(totals.commission)}</td>

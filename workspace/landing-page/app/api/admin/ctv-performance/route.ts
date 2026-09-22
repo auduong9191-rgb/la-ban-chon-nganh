@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
         .lt("created_at", rangeEnd),
       supabaseAdmin
         .from("leads")
-        .select("ctv_code, amount, status, paid_at")
+        .select("ctv_code, amount, status, paid_at, discount_code")
         .gte("paid_at", rangeStart)
         .lt("paid_at", rangeEnd),
     ]);
@@ -71,16 +71,22 @@ export async function GET(req: NextRequest) {
         const freeCount = quizLeads.filter((q) => q.ctv_code === ctv.ctv_code).length;
         const ctvLeads = leads.filter((l) => l.ctv_code === ctv.ctv_code);
         const paidLeads = ctvLeads.filter((l) => l.status === "paid");
+        // Đơn áp mã TIARA100 (giảm 100%, coi như tặng) không phải đơn thực trả
+        // tiền — đã tặng free rồi thì không trả thêm hoa hồng, chỉ đếm số lượt
+        // dùng mã để theo dõi, không cộng vào paidCount/doanh số/hoa hồng.
+        const tiara100Leads = paidLeads.filter((l) => l.discount_code === "TIARA100");
+        const commissionLeads = paidLeads.filter((l) => l.discount_code !== "TIARA100");
         const refundCount = ctvLeads.filter((l) => l.status === "refunded").length;
-        const revenue = paidLeads.reduce((sum, l) => sum + (l.amount ?? 0), 0);
-        const commission = paidLeads.length * ctv.commission_amount;
+        const revenue = commissionLeads.reduce((sum, l) => sum + (l.amount ?? 0), 0);
+        const commission = commissionLeads.length * ctv.commission_amount;
         return {
           ctvCode: ctv.ctv_code,
           name: ctv.name,
           groupType: ctv.group_type,
           isActive: ctv.is_active,
           freeCount,
-          paidCount: paidLeads.length,
+          paidCount: commissionLeads.length,
+          tiara100Count: tiara100Leads.length,
           refundCount,
           revenue,
           commission,
